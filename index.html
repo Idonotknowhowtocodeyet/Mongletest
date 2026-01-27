@@ -5,99 +5,131 @@
     <title>Google Drive</title>
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <style>
-        :root { --primary: #00ff41; --bg: #000500; --card: rgba(10, 10, 10, 0.95); --accent: #003b00; --gold: #ffd700; }
+        :root { --primary: #00ff41; --bg: #000500; --card: rgba(15, 15, 15, 0.95); --accent: #003b00; --gold: #ffd700; --spotlight: #00ccff; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Courier New', monospace; overflow: hidden; }
 
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        /* 404 ERROR SCREEN */
+        #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; font-family: arial, sans-serif; text-align: center; }
+        #lockdownScreen h1 { font-size: 22px; color: #222; margin-bottom: 10px; }
+        #lockdownScreen p { font-size: 14px; color: #555; }
 
-        /* GRID & HEADERS */
+        /* MAIN APP */
+        #mainApp { display: none; height: 100%; }
+        
+        /* LOGIN LAYER */
+        #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 10px solid #000; }
+        .login-card { width: 340px; padding: 40px; border: 1px solid var(--primary); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        
+        /* ARCADE UI */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--primary); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 30px; height: calc(100vh - 100px); overflow-y: auto; align-content: start; }
         
-        .category-header { 
-            grid-column: 1 / -1; 
-            color: var(--gold); 
-            border-bottom: 2px solid var(--gold); 
-            margin: 30px 0 10px 0; 
-            padding-bottom: 5px; 
-            font-size: 22px; 
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            text-transform: uppercase;
-        }
-        .category-header:first-child { margin-top: 0; }
+        .category-header { grid-column: 1 / -1; color: var(--gold); border-bottom: 2px solid var(--gold); margin: 30px 0 10px 0; font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        .spotlight-header { color: var(--spotlight); border-color: var(--spotlight); text-shadow: 0 0 10px var(--spotlight); }
 
-        /* GAME CARDS */
-        .game-card { 
-            background: var(--card); 
-            border: 1px solid var(--accent); 
-            border-radius: 12px; 
-            padding: 15px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            position: relative;
-            overflow: hidden;
-        }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
-        
-        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; margin-bottom: 12px; background: #111; border: 1px solid #222; }
-        
-        .fav-star {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            color: #333;
-            transition: 0.2s;
-            z-index: 10;
-        }
-        .fav-star.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-        .fav-star:hover { transform: scale(1.2); }
+        /* GAME CARDS & TEXT */
+        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; }
+        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; margin-bottom: 12px; background: #111; }
+        .game-title { color: white !important; font-size: 13px; font-weight: bold; display: block; margin-top: 5px; }
 
-        /* TOP BAR */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px 15px; width: 300px; border-radius: 5px; outline: none; font-family: inherit; }
+        /* ROOT CONTROLS */
+        .fav-star { position: absolute; top: 10px; right: 10px; font-size: 24px; color: rgba(255,255,255,0.1); display: none; }
+        .root-mode .fav-star { display: block; }
+        .fav-star.active { color: var(--spotlight); }
+
+        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; outline: none; font-family: inherit; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="mainApp">
-        <div class="top-bar">
-            <div style="font-weight: bold; letter-spacing: 2px;">MONGLE_ARCADE <span style="font-size: 10px; color: #444;">v2.5.0</span></div>
-            <div id="liveClock" style="color: var(--primary); font-size: 18px;">00:00:00</div>
-            <input type="text" id="gameSearch" class="input-box" placeholder="SEARCH_DATABASE..." onkeyup="renderGames()">
-        </div>
-        <div class="grid" id="gameGrid"></div>
+    <div id="lockdownScreen">
+        <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" style="margin-bottom:20px; width:60px;">
+        <h1>404. That’s an error.</h1>
+        <p>The requested URL was not found on this server. <br> <span style="color:#888; font-size:12px;">That’s all we know.</span></p>
     </div>
 
-    <script>
+    <div id="mainApp">
+        <div id="authLayer">
+            <div class="login-card">
+                <h2 style="letter-spacing:5px; margin-bottom:30px;">MONGLE_OS</h2>
+                <input type="text" id="username" class="input-box" placeholder="USER_ID">
+                <input type="password" id="password" class="input-box" placeholder="SEC_KEY">
+                <button class="input-box" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;" onclick="handleLogin('pleb')">INITIALIZE</button>
+                <div style="margin-top:10px;">
+                    <button style="background:none; border:none; color:#222; font-size:10px; cursor:pointer;" onclick="handleLogin('root')">ROOT_CONSOLE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="arcade" class="hidden">
+            <div class="top-bar">
+                <div id="liveClock">00:00:00</div>
+                <input type="text" id="gameSearch" class="input-box" style="width:300px; margin:0;" placeholder="SEARCH_DB..." onkeyup="renderGames()">
+                <button class="input-box" style="width:auto; margin:0; background:#330000; color:red; border-color:red;" onclick="location.reload()">LOGOUT</button>
+            </div>
+            <div class="grid" id="gameGrid"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY",
+            databaseURL: "https://monglearcade-default-rtdb.firebaseio.com",
+            projectId: "monglearcade"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         let allGames = [];
-        let favorites = JSON.parse(localStorage.getItem('mongle_favs')) || [];
+        let globalFavorites = [];
+        let isRoot = false;
+
+        // Shift + L Bypass
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key === 'L') {
+                document.getElementById('lockdownScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+            }
+        });
+
+        window.handleLogin = (type) => {
+            const pass = btoa(document.getElementById('password').value);
+            if (type === 'root' && pass === "TU9OR0xFX09XTkVSXzk5") {
+                isRoot = true;
+                document.body.classList.add('root-mode');
+            }
+            document.getElementById('authLayer').classList.add('hidden');
+            document.getElementById('arcade').classList.remove('hidden');
+            fetchGames();
+            syncGlobalFavs();
+        };
 
         async function fetchGames() {
-            try {
-                const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
-                const items = await res.json();
-                // Filter for HTML files and ignore index
-                allGames = items.filter(i => i.name.endsWith('.html') && i.name !== 'index.html');
-                renderGames();
-            } catch (e) {
-                console.error("Critical: Database Unreachable.");
-            }
+            const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
+            const items = await res.json();
+            allGames = items.filter(i => i.name.endsWith('.html') && i.name !== 'index.html');
+            renderGames();
         }
 
-        window.toggleFav = (e, filename) => {
-            e.stopPropagation(); // Prevents opening the game when clicking the star
-            if (favorites.includes(filename)) {
-                favorites = favorites.filter(f => f !== filename);
-            } else {
-                favorites.push(filename);
-            }
-            localStorage.setItem('mongle_favs', JSON.stringify(favorites));
-            renderGames();
+        function syncGlobalFavs() {
+            onValue(ref(db, 'global/spotlight'), (snapshot) => {
+                globalFavorites = snapshot.val() || [];
+                renderGames();
+            });
+        }
+
+        window.toggleGlobalFav = (e, filename) => {
+            e.stopPropagation();
+            if (!isRoot) return;
+            let newFavs = globalFavorites.includes(filename) 
+                ? globalFavorites.filter(f => f !== filename) 
+                : [...globalFavorites, filename];
+            set(ref(db, 'global/spotlight'), newFavs);
         };
 
         window.renderGames = () => {
@@ -105,55 +137,34 @@
             const grid = document.getElementById('gameGrid');
             grid.innerHTML = "";
 
-            const groups = {
-                "⭐ Favorites": [],
-                "🐻 Freddy's Collection": [],
-                "🕹️ All Games": []
-            };
+            const groups = { "🏆 BEST OF THE WEEK": [], "🐻 Freddy's Collection": [], "🕹️ All Games": [] };
             
             allGames.forEach(game => {
-                const filename = game.name;
-                const name = filename.replace('.html', '').replace(/_/g, ' ');
-                if (query && !name.toLowerCase().includes(query)) return;
+                const cleanName = game.name.replace('.html', '').replace(/_/g, ' ');
+                if (query && !cleanName.toLowerCase().includes(query)) return;
 
-                const isFav = favorites.includes(filename);
+                const isSpotlight = globalFavorites.includes(game.name);
                 const gameObj = {
-                    name: name,
-                    filename: filename,
-                    isFav: isFav,
-                    url: `https://raw.githack.com/bob154526-hue/Mongle/main/${filename}`,
-                    icon: `https://raw.githubusercontent.com/bob154526-hue/Mongle/main/icons/${filename.replace('.html', '.png')}`
+                    name: cleanName, filename: game.name, isSpotlight,
+                    url: `https://raw.githack.com/bob154526-hue/Mongle/main/${game.name}`,
+                    icon: `https://raw.githubusercontent.com/bob154526-hue/Mongle/main/icons/${game.name.replace('.html', '.png')}`
                 };
 
-                // Logic: 1. Favorites | 2. Freddy Group | 3. General
-                const lowName = name.toLowerCase();
-                const isFreddy = lowName.includes('freddy') || lowName.includes('fnaf') || lowName.includes('sister location') || lowName.includes('custom night') || lowName.includes('pizza simulator');
-
-                if (isFav) {
-                    groups["⭐ Favorites"].push(gameObj);
-                } else if (isFreddy) {
-                    groups["🐻 Freddy's Collection"].push(gameObj);
-                } else {
-                    groups["🕹️ All Games"].push(gameObj);
-                }
+                if (isSpotlight) groups["🏆 BEST OF THE WEEK"].push(gameObj);
+                else if (cleanName.toLowerCase().match(/freddy|fnaf|sister location|pizza simulator/)) groups["🐻 Freddy's Collection"].push(gameObj);
+                else groups["🕹️ All Games"].push(gameObj);
             });
 
-            // Render categories
             for (const [title, games] of Object.entries(groups)) {
-                if (games.length === 0) continue;
-                
-                const head = document.createElement('div');
-                head.className = 'category-header';
-                head.innerText = title;
-                grid.appendChild(head);
-
+                if (!games.length) continue;
+                grid.innerHTML += `<div class="category-header ${title.includes('WEEK') ? 'spotlight-header' : ''}">${title}</div>`;
                 games.forEach(g => {
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
-                        <div class="fav-star ${g.isFav ? 'active' : ''}" onclick="toggleFav(event, '${g.filename}')">★</div>
+                        <div class="fav-star ${g.isSpotlight ? 'active' : ''}" onclick="toggleGlobalFav(event, '${g.filename}')">★</div>
                         <img class="game-icon" src="${g.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/686/686588.png'">
-                        <div style="font-size:13px; font-weight:bold; color:white;">${g.name}</div>
+                        <span class="game-title">${g.name}</span>
                     `;
                     card.onclick = () => window.open(g.url, '_blank');
                     grid.appendChild(card);
@@ -161,8 +172,6 @@
             }
         };
 
-        // Init
-        fetchGames();
         setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString(); }, 1000);
     </script>
 </body>
