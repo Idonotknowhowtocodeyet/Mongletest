@@ -5,94 +5,127 @@
     <title>Google Drive</title>
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <style>
-        :root { --primary: #00d2ff; --bg: #000810; --card: rgba(0, 18, 32, 0.95); --accent: #002233; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: #e2e8f0; font-family: sans-serif; overflow: hidden; }
-        #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-        #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; align-items: center; justify-content: center; }
-        .login-box { width: 340px; padding: 40px; background: #000; border: 1px solid var(--accent); border-radius: 15px; text-align: center; }
-        .top-bar { position: relative; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.85); border-bottom: 1px solid var(--accent); }
-        .grid { position: relative; z-index: 10; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 40px; height: calc(100vh - 85px); overflow-y: auto; }
-        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 20px; padding: 30px 15px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        #settingsPanel { position: fixed; top: 0; right: -350px; width: 320px; height: 100vh; background: rgba(0, 5, 10, 0.98); border-left: 2px solid var(--primary); z-index: 2000; transition: 0.4s; padding: 25px; }
+        :root { --primary: #00ff41; --bg: #000500; --card: rgba(0, 20, 0, 0.9); --accent: #003b00; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Courier New', monospace; overflow: hidden; }
+
+        /* LOCKDOWN WHITE SCREEN */
+        #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: black; transition: 0.5s; }
+        #lockdownScreen h1 { font-size: 24px; margin-bottom: 10px; }
+        
+        /* HIDDEN BYPASS FIELD */
+        #bypassInput { position: absolute; top: 0; right: 0; width: 50px; height: 30px; opacity: 0.02; border: none; outline: none; background: transparent; cursor: default; }
+        #bypassInput:focus { opacity: 0.2; background: #eee; }
+
+        /* MAIN UI */
+        #mainApp { background: var(--bg); height: 100%; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.9); border-bottom: 1px solid var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 40px; }
+        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 10px; padding: 20px; text-align: center; color: var(--primary); cursor: pointer; }
+        .game-icon { width: 60px; height: 60px; margin-bottom: 10px; border-radius: 8px; }
+
+        /* SETTINGS */
+        #settingsPanel { position: fixed; top: 0; right: -350px; width: 320px; height: 100vh; background: #000; border-left: 2px solid var(--primary); z-index: 2000; transition: 0.4s; padding: 25px; color: var(--primary); }
         #settingsPanel.open { right: 0; }
-        .search-input { background: #000; border: 1px solid var(--accent); color: white; padding: 10px 15px; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas>
-    <div id="authLayer">
-        <div class="login-box">
-            <h1 style="color:var(--primary); letter-spacing:10px;">MONGLE</h1>
-            <input type="text" id="username" class="search-input" style="margin-bottom:12px;" placeholder="Username">
-            <input type="password" id="password" class="search-input" style="margin-bottom:25px;" placeholder="Security Key">
-            <button class="search-input" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;" onclick="handleLogin('pleb')">ACCESS</button>
-            <button onclick="handleLogin('root')" style="margin-top:25px; background:none; border:none; color:#111; font-size:10px; cursor:pointer;">[ROOT]</button>
-        </div>
+
+    <div id="lockdownScreen">
+        <h1>SITE UNDER MAINTENANCE</h1>
+        <p>Access is restricted. Please try again later.</p>
+        <input type="password" id="bypassInput" placeholder="???" oninput="checkBypass(this.value)">
     </div>
 
-    <div id="arcade" class="hidden">
-        <div class="top-bar">
-            <div id="liveClock" style="color:var(--primary); font-family:monospace; font-weight:bold;">00:00:00</div>
-            <div style="display:flex; gap:12px;">
-                <input type="text" id="gameSearch" class="search-input" style="width:200px;" placeholder="Search...">
-                <button id="settingsBtn" class="search-input" style="display:none; color:var(--primary); width:auto;" onclick="toggleSettings()">⚙️</button>
-                <button class="search-input" style="background:#f44; color:white; border:none; width:auto;" onclick="location.replace('https://classroom.google.com')">PANIC</button>
+    <div id="mainApp" class="hidden">
+        <div id="authLayer" style="position:fixed; inset:0; background:#000; z-index:5000; display:flex; align-items:center; justify-content:center;">
+            <div style="width:300px; text-align:center; border:1px solid var(--primary); padding:30px;">
+                <h2 style="color:var(--primary)">SYSTEM_AUTH</h2>
+                <input type="text" id="username" class="input-box" placeholder="USERNAME">
+                <input type="password" id="password" class="input-box" placeholder="SECURITY_KEY">
+                <button class="input-box" style="background:var(--primary); color:#000; font-weight:bold;" onclick="doLogin('pleb')">USER LOGIN</button>
+                <div style="display:flex; gap:5px;">
+                    <button class="input-box" style="font-size:10px;" onclick="doLogin('admin')">ADMIN LOGIN</button>
+                    <button class="input-box" style="font-size:10px;" onclick="doLogin('root')">ROOT LOGIN</button>
+                </div>
             </div>
         </div>
-        <div class="grid" id="gameGrid"></div>
+
+        <div id="arcade" class="hidden">
+            <div class="top-bar">
+                <div style="color:var(--primary)" id="clock">00:00</div>
+                <div style="display:flex; gap:10px;">
+                    <button id="settingsBtn" class="input-box" style="display:none; width:auto; margin:0;" onclick="toggleSettings()">⚙️ SETTINGS</button>
+                    <button class="input-box" style="background:#f44; color:white; border:none; width:auto; margin:0;" onclick="location.replace('https://classroom.google.com')">PANIC</button>
+                </div>
+            </div>
+            <div class="grid" id="gameGrid"></div>
+        </div>
     </div>
 
     <div id="settingsPanel">
-        <h2 style="color:var(--primary);">OWNER CONSOLE</h2>
-        <button id="maintBtn" class="search-input" style="background:#004466; color:white;" onclick="toggleMaintenance()">LOCKDOWN: ON</button>
-        <div style="margin-top:20px;">
-            <h4 style="color:var(--primary);">ACTIVE USERS</h4>
-            <div id="userList"></div>
-        </div>
+        <h3>ADMIN CONSOLE</h3>
+        <button id="lockToggle" class="input-box" onclick="toggleServerLock()">LOCKDOWN: ON</button>
+        <p style="font-size:10px;">Connected Users:</p>
+        <div id="userList"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY",
             authDomain: "monglearcade.firebaseapp.com",
             projectId: "monglearcade",
-            storageBucket: "monglearcade.firebasestorage.app",
-            messagingSenderId: "637983149122",
+            databaseURL: "https://monglearcade-default-rtdb.firebaseio.com",
             appId: "1:637983149122:web:e6969750929fbb6b1871db"
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.handleLogin = function(type) {
-            let user = document.getElementById('username').value.trim() || "Guest";
-            const pass = btoa(document.getElementById('password').value);
-            let role = 'pleb';
+        // BYPASS LOGIC
+        window.checkBypass = (val) => {
+            // Change 'mongle77' to whatever bypass password you want
+            if(val === "mongle77") {
+                document.getElementById('lockdownScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+            }
+        };
 
-            if(type === 'root' && pass === "TU9OR0xFX09XTkVSXzk5") { role = 'root'; user = "OWNER"; } 
-            else if(type === 'pleb' && user) { role = 'pleb'; } 
-            else { return alert("Denied"); }
-
-            sessionStorage.setItem('mUser', user);
-            sessionStorage.setItem('mRole', role);
+        // MAINTENANCE SYNC
+        onValue(ref(db, 'global/maintenance'), (snapshot) => {
+            const isLocked = snapshot.val() !== false;
+            const role = sessionStorage.getItem('mRole');
             
-            set(ref(db, 'status/' + user), { name: user, role: role, time: Date.now() });
-            onDisconnect(ref(db, 'status/' + user)).remove();
+            // If locked and not already bypassed/admin, show white screen
+            if(isLocked && role !== 'root' && role !== 'admin') {
+                document.getElementById('lockdownScreen').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+            }
+            
+            const btn = document.getElementById('lockToggle');
+            if(btn) btn.innerText = isLocked ? "LOCKDOWN: ON" : "LOCKDOWN: OFF";
+        });
+
+        window.doLogin = (roleType) => {
+            const user = document.getElementById('username').value || "Guest";
+            const pass = document.getElementById('password').value;
+            
+            if(roleType === 'root' && pass === "OWNER_PASS") {
+                sessionStorage.setItem('mRole', 'root');
+                document.getElementById('settingsBtn').style.display = "block";
+            } else if(roleType === 'admin' && pass === "ADMIN_PASS") {
+                sessionStorage.setItem('mRole', 'admin');
+                document.getElementById('settingsBtn').style.display = "block";
+            } else {
+                sessionStorage.setItem('mRole', 'pleb');
+            }
 
             document.getElementById('authLayer').classList.add('hidden');
             document.getElementById('arcade').classList.remove('hidden');
-            
-            if(role === 'root') {
-                document.getElementById('settingsBtn').style.display = 'block';
-                window.addEventListener('keydown', (e) => { if(e.key === '`') toggleSettings(); });
-                trackUsers();
-            }
             loadGames();
-            syncSystem();
         };
 
         async function loadGames() {
@@ -101,62 +134,21 @@
             const grid = document.getElementById('gameGrid'); grid.innerHTML = "";
             items.forEach(item => {
                 if(item.name.endsWith('.html') && item.name !== 'index.html') {
-                    const cleanName = item.name.replace('.html', '').replace(/_/g, ' ');
                     const d = document.createElement('div');
                     d.className = 'game-card';
-                    d.innerHTML = `<span style="font-size:45px;">🎮</span><h3>${cleanName}</h3>`;
-                    d.onclick = async () => {
-                        // THE FIX: RawGithack bypasses the "code view" issue
+                    d.innerHTML = `<h3>${item.name.replace('.html', '')}</h3>`;
+                    d.onclick = () => {
                         const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${item.name}`;
-                        const win = window.open('about:blank', '_blank');
-                        win.document.write(`<html><body style="margin:0;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;"></iframe></body></html>`);
+                        window.open(url, '_blank');
                     };
                     grid.appendChild(d);
                 }
             });
         }
 
-        function syncSystem() {
-            onValue(ref(db, 'global/maintenance'), (s) => {
-                const isLocked = s.val() !== false;
-                if(isLocked && sessionStorage.getItem('mRole') === 'pleb') location.replace('https://classroom.google.com');
-                const btn = document.getElementById('maintBtn');
-                if(btn) {
-                    btn.innerText = isLocked ? "LOCKDOWN: ON" : "LOCKDOWN: OFF";
-                    btn.style.background = isLocked ? "#00d2ff" : "#111";
-                    btn.style.color = isLocked ? "#000" : "#fff";
-                }
-            });
-        }
-
-        function trackUsers() {
-            onValue(ref(db, 'status'), (s) => {
-                const list = document.getElementById('userList'); list.innerHTML = "";
-                s.forEach(c => {
-                    const u = c.val();
-                    const row = document.createElement('div');
-                    row.style = "display:flex; justify-content:space-between; margin-bottom:5px; background:#111; padding:8px; border-radius:5px;";
-                    row.innerHTML = `<span>${u.name}</span><button onclick="kickUser('${c.key}')" style="background:red; color:white; border:none; cursor:pointer;">KICK</button>`;
-                    list.appendChild(row);
-                });
-            });
-        }
-
-        window.kickUser = (id) => set(ref(db, 'kicks/' + id), true);
-        window.toggleMaintenance = () => get(ref(db, 'global/maintenance')).then(s => set(ref(db, 'global/maintenance'), !s.val()));
+        window.toggleServerLock = () => get(ref(db, 'global/maintenance')).then(s => set(ref(db, 'global/maintenance'), !s.val()));
         window.toggleSettings = () => document.getElementById('settingsPanel').classList.toggle('open');
-        
-        const cvs = document.getElementById('particleCanvas'); const ctx = cvs.getContext('2d');
-        let pts = []; function rsz() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }
-        window.onresize = rsz; rsz();
-        for(let i=0; i<50; i++) pts.push({x: Math.random()*cvs.width, y: Math.random()*cvs.height, v: 0.2});
-        function loop() {
-            ctx.clearRect(0,0,cvs.width,cvs.height); ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
-            pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 1.2, 0, 7); ctx.fill(); p.y -= p.v; if(p.y < 0) p.y = cvs.height; });
-            requestAnimationFrame(loop);
-        }
-        loop();
-        setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
     </script>
 </body>
 </html>
