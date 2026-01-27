@@ -1,1 +1,39 @@
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", 
+        databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", 
+        projectId: "monglearcade" 
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- LIVE USER TRACKING ---
+    // When a user opens the page, add them to the "presence" list
+    const myPresenceRef = push(ref(db, 'stats/presence'));
+    set(myPresenceRef, true);
+    // When they close the tab, remove them automatically
+    onDisconnect(myPresenceRef).remove();
+
+    // --- GAME CLICK TRACKING ---
+    // This function runs every time someone clicks a game card
+    window.trackClick = (gameName) => {
+        const cleanName = gameName.replace('.html', '').replace(/\./g, '_');
+        const clickRef = ref(db, `stats/clicks/${cleanName}`);
+        
+        onValue(clickRef, (snap) => {
+            let currentClicks = snap.val() || 0;
+            set(clickRef, currentClicks + 1);
+        }, { onlyOnce: true });
+    };
+
+    // --- ROOT CONSOLE POWERS ---
+    window.setOwnerPick = () => {
+        const pick = document.getElementById('ownerPickInput').value;
+        set(ref(db, 'global/ownerPick'), pick);
+        alert("Top Pick Updated to: " + pick);
+    };
+</script>
