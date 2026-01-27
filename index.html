@@ -5,138 +5,124 @@
     <link id="tabIcon" rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
     <style>
         :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; transition: filter 0.3s; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         
-        /* HACKER PRANK OVERLAY */
-        #hackerScreen { position: fixed; inset: 0; background: black; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; z-index: 150000; display: none; overflow: hidden; pointer-events: none; }
-        
-        /* SCREEN OF DEATH */
-        #destructScreen { position: fixed; inset: 0; background: white; z-index: 200000; display: none; flex-direction: column; align-items: center; justify-content: center; color: black; text-align: center; opacity: 0; transition: opacity 4s ease-in; }
+        /* PRANK OVERLAYS */
+        #hackerScreen { position: fixed; inset: 0; background: black; color: #0f0; font-family: monospace; padding: 20px; z-index: 150000; display: none; }
+        #destructScreen { position: fixed; inset: 0; background: white; z-index: 200000; display: none; flex-direction: column; align-items: center; justify-content: center; color: black; opacity: 0; transition: opacity 4s; }
 
-        .navbar { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 1000; }
-        .status-dot { height: 10px; width: 10px; background: #4ade80; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #4ade80; animation: pulse 2s infinite; }
-        @keyframes pulse { 50% { opacity: 0.3; } }
+        /* UI */
+        .navbar { background: rgba(15, 23, 42, 0.95); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+        .timer-display { color: #facc15; font-weight: bold; font-family: monospace; font-size: 1.1rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px; }
+        .game-card { background: var(--card); border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #1e293b; cursor: pointer; }
         
-        .container { padding: 20px; max-width: 1400px; margin: auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; }
-        .game-card { background: var(--card); border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #1e293b; cursor: pointer; transition: 0.3s; }
-        .game-card:hover { border-color: var(--accent); transform: scale(1.05); }
-
         #gameView { position: fixed; inset: 0; background: #000; z-index: 30000; display: none; flex-direction: column; }
         iframe { flex-grow: 1; border: none; }
         .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; background: var(--accent); }
-        #adminLink { display: none; position: fixed; bottom: 20px; right: 20px; background: #ef4444; padding: 12px; border-radius: 10px; color: white; text-decoration: none; z-index: 1001; }
+        #maintScreen { position: fixed; inset: 0; background: #000; z-index: 90000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body id="mainBody">
 
     <div id="hackerScreen"></div>
+    <div id="destructScreen"><h1>FATAL_ERROR: SYSTEM_HALTED</h1></div>
 
-    <div id="destructScreen">
-        <h1 style="font-size: 3rem;">CORE_SYSTEM_ERROR</h1>
-        <p>Memory at 0x0045F parity check failed.</p>
+    <div id="maintScreen">
+        <h1 style="color:#ef4444;">⚠️ ACCESS DENIED</h1>
+        <p>This site is currently locked by the administrator.</p>
+        <input type="password" id="maintPass" placeholder="Bypass..." style="padding:10px; margin-top:20px;">
+        <button class="btn" onclick="if(document.getElementById('maintPass').value==='1234'){sessionStorage.setItem('mBypass','true');location.reload();}">Unlock</button>
     </div>
 
     <div class="navbar">
-        <div><span class="status-dot"></span> <span id="statusTxt" style="color:#4ade80; font-weight:bold; font-size: 0.8rem;">SYSTEM LIVE</span></div>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="search" placeholder="Search..." onkeyup="search()" style="padding:8px; background:#000; color:white; border:1px solid #333; border-radius:8px;">
-            <button class="btn" style="background:#ef4444" onclick="location.replace('https://google.com')">Panic</button>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <span style="color:#4ade80; font-weight:bold;">● LIVE</span>
+            <span id="timer" class="timer-display"></span>
         </div>
+        <button class="btn" style="background:#ef4444" onclick="location.replace('https://google.com')">Panic</button>
     </div>
 
-    <div class="container">
-        <div id="mainGrid" class="grid"></div>
-    </div>
+    <div id="mainGrid" class="grid"></div>
 
     <div id="gameView">
-        <div style="padding:10px; background:#111;"><button class="btn" onclick="exitGame()">← Exit Game</button></div>
+        <div style="padding:10px; background:#111;"><button class="btn" onclick="exitGame()">← Exit</button></div>
         <iframe id="gameFrame"></iframe>
     </div>
-
-    <a href="wiki.html" id="adminLink">🛡️ ADMIN PANEL</a>
 
     <script>
         const REPO = { user: "bob154526-hue", name: "Mongle" };
 
-        // REAL-TIME PRANK LISTENER
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'mPrank') handlePranks(e.newValue);
-        });
+        // 1. TIMER & LOCK LOGIC
+        function startTimer() {
+            setInterval(() => {
+                const lockTime = localStorage.getItem('mLockUntil');
+                if (lockTime) {
+                    const now = Date.now();
+                    const timeLeft = lockTime - now;
 
-        function handlePranks(type) {
-            const hScreen = document.getElementById('hackerScreen');
-            const dScreen = document.getElementById('destructScreen');
-            
-            // Reset
-            hScreen.style.display = 'none';
-            dScreen.style.display = 'none';
-            dScreen.style.opacity = '0';
-
-            if (type === 'hacker') {
-                hScreen.style.display = 'block';
-                runHackerEffect();
-            } else if (type === 'destruct') {
-                exitGame();
-                dScreen.style.display = 'flex';
-                setTimeout(() => { dScreen.style.opacity = '1'; }, 50);
-            } else if (!type) {
-                location.reload();
-            }
+                    if (timeLeft <= 0) {
+                        localStorage.removeItem('mLockUntil');
+                        localStorage.setItem('mMaint', 'true');
+                        location.reload();
+                    } else {
+                        const mins = Math.floor(timeLeft / 60000);
+                        const secs = Math.floor((timeLeft % 60000) / 1000);
+                        document.getElementById('timer').innerText = `LOCKING IN: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                    }
+                } else {
+                    document.getElementById('timer').innerText = "";
+                }
+            }, 1000);
         }
 
-        function runHackerEffect() {
-            const lines = ["Decrypting password...", "Accessing root/bin...", "Bypassing firewall...", "Stealing user credentials...", "Uploading payload...", "Connection established...", "Tracking IP: 192.168.1.1"];
+        // 2. PRANK & MAINT CHECK
+        window.addEventListener('storage', () => location.reload()); 
+        
+        if (localStorage.getItem('mMaint') === 'true' && !sessionStorage.getItem('mBypass')) {
+            document.getElementById('maintScreen').style.display = 'flex';
+        }
+
+        const prank = localStorage.getItem('mPrank');
+        if (prank === 'destruct') {
+            document.getElementById('destructScreen').style.display = 'flex';
+            setTimeout(() => document.getElementById('destructScreen').style.opacity = '1', 100);
+        } else if (prank === 'hacker') {
+            document.getElementById('hackerScreen').style.display = 'block';
             setInterval(() => {
                 const p = document.createElement('p');
-                p.innerText = "> " + lines[Math.floor(Math.random() * lines.length)];
+                p.innerText = "> DECRYPTING_PACKET_" + Math.random().toString(16).slice(2, 8);
                 document.getElementById('hackerScreen').appendChild(p);
-                if(document.getElementById('hackerScreen').childElementCount > 30) document.getElementById('hackerScreen').firstChild.remove();
-            }, 200);
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 100);
         }
 
+        // 3. LOADER
         async function load() {
-            try {
-                const res = await fetch(`https://api.github.com/repos/${REPO.user}/${REPO.name}/contents/`);
-                const files = await res.json();
-                const emoji = localStorage.getItem('mEmoji') || "🎮";
-                files.forEach(file => {
-                    if(!file.name.endsWith('.html') || ['index.html','wiki.html'].includes(file.name)) return;
-                    const card = document.createElement('div');
-                    card.className = 'game-card';
-                    card.innerHTML = `<div onclick="play('${file.download_url}')"><div style="font-size:40px">${emoji}</div><b>${file.name.replace('.html','')}</b></div>`;
-                    document.getElementById('mainGrid').appendChild(card);
-                });
-            } catch(e) { console.error("Load failed. Check Repo URL."); }
+            const res = await fetch(`https://api.github.com/repos/${REPO.user}/${REPO.name}/contents/`);
+            const files = await res.json();
+            const emoji = localStorage.getItem('mEmoji') || "🎮";
+            files.forEach(file => {
+                if(!file.name.endsWith('.html') || file.name === 'index.html' || file.name === 'wiki.html') return;
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `<div onclick="play('${file.download_url}')"><div style="font-size:40px">${emoji}</div><b>${file.name.replace('.html','')}</b></div>`;
+                document.getElementById('mainGrid').appendChild(card);
+            });
         }
 
         async function play(url) {
             const r = await fetch(url);
             const h = await r.text();
-            // BUG FIX: Using Blob to bypass iframe restrictions
             const blob = new Blob([h], {type: 'text/html'});
             document.getElementById('gameView').style.display='flex';
             document.getElementById('gameFrame').src = URL.createObjectURL(blob);
         }
-
-        function exitGame() {
-            document.getElementById('gameView').style.display='none';
-            document.getElementById('gameFrame').src = "about:blank";
-        }
-
-        function search() {
-            let q = document.getElementById('search').value.toLowerCase();
-            // BUG FIX: Strictly check for 'mongle' session before showing admin link
-            if(q === 'admin' && sessionStorage.getItem('mAuth') === 'mongle') {
-                document.getElementById('adminLink').style.display = 'block';
-            }
-            document.querySelectorAll('.game-card').forEach(c => {
-                c.style.display = c.innerText.toLowerCase().includes(q) ? 'block' : 'none';
-            });
-        }
-
-        if(localStorage.getItem('mPrank')) handlePranks(localStorage.getItem('mPrank'));
+        
+        function exitGame() { document.getElementById('gameView').style.display='none'; document.getElementById('gameFrame').src = "about:blank"; }
+        
         load();
+        startTimer();
     </script>
 </body>
 </html>
