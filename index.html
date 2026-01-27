@@ -11,36 +11,40 @@
         /* BYPASS SCREEN */
         #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; font-family: arial, sans-serif; text-align: center; }
         
-        /* APP WRAPPERS */
-        #mainApp { display: none; height: 100%; }
+        /* AUTH LAYER */
         #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-card { width: 340px; padding: 40px; border: 1px solid var(--primary); text-align: center; background: #000800; }
+        .login-card { width: 340px; padding: 40px; border: 1px solid var(--primary); text-align: center; background: #000800; box-shadow: 0 0 20px var(--accent); }
         
-        /* UI COMPONENTS */
+        /* APP UI */
+        #arcade { display: none; height: 100%; flex-direction: column; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid var(--primary); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 30px; height: calc(100vh - 120px); overflow-y: auto; align-content: start; }
-        .vanish-active { display: none !important; }
-
+        
         /* SIDE PANEL */
-        .side-panel { position: fixed; top: 0; right: -350px; width: 300px; height: 100vh; background: #000; border-left: 1px solid var(--primary); z-index: 6000; transition: 0.4s; padding: 25px; box-sizing: border-box; }
+        .side-panel { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: #000; border-left: 1px solid var(--primary); z-index: 6000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; box-sizing: border-box; }
         .side-panel.open { right: 0; }
-        .close-btn { position: absolute; top: 10px; left: 10px; color: red; cursor: pointer; font-weight: bold; border: 1px solid red; padding: 2px 8px; }
+        .close-btn { position: absolute; top: 15px; left: 15px; color: #ff4444; cursor: pointer; font-weight: bold; font-size: 20px; border: 1px solid #ff4444; padding: 0 10px; }
 
+        /* INPUTS & BUTTONS */
+        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 15px; outline: none; font-family: inherit; }
+        .btn-action { cursor: pointer; transition: 0.2s; }
+        .btn-action:hover { background: var(--primary); color: #000; }
+        
+        /* GAME CARDS */
+        .game-card { background: var(--card); border: 1px solid #111; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .game-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 255, 65, 0.2); }
+        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 5px; object-fit: cover; margin-bottom: 12px; pointer-events: none; }
+        
         /* TICKER */
         .ticker-wrap { position: fixed; bottom: 0; width: 100%; overflow: hidden; background: #050505; border-top: 1px solid var(--accent); height: 35px; line-height: 35px; }
-        .ticker { display: inline-block; white-space: nowrap; animation: ticker-move 30s linear infinite; padding-left: 100%; }
-        .ticker-item { display: inline-block; padding: 0 50px; font-size: 12px; }
+        .ticker { display: inline-block; white-space: nowrap; animation: ticker-move 30s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 50px; font-size: 12px; color: var(--primary); }
+        @keyframes ticker-move { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; outline: none; font-family: inherit; }
-        .game-card { background: var(--card); border: 1px solid #111; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 5px; object-fit: cover; margin-bottom: 12px; }
-        .game-title { color: #fff; font-size: 13px; font-weight: bold; }
-        
-        /* PERMISSION CLASSES */
-        .root-only, .admin-only { display: none; }
-        .is-root .root-only { display: block; }
-        .is-admin .admin-only { display: block; }
+        /* VISIBILITY TIERS */
+        .root-tool, .admin-tool { display: none !important; }
+        body.is-root .root-tool, body.is-root .admin-tool { display: block !important; }
+        body.is-admin .admin-tool { display: block !important; }
     </style>
 </head>
 <body class="is-pleb">
@@ -51,53 +55,52 @@
         <p>The requested URL was not found on this server.</p>
     </div>
 
-    <div id="mainApp">
-        <div id="authLayer">
-            <div class="login-card">
-                <h2 style="letter-spacing:4px;">MONGLE_SYSTEMS</h2>
-                <input type="password" id="password" class="input-box" placeholder="ACCESS_KEY">
-                <button class="input-box" style="background:var(--primary); color:#000;" onclick="handleLogin('pleb')">USER LOGIN</button>
-                <div style="display: flex; gap: 10px;">
-                    <button class="input-box" style="font-size: 10px;" onclick="handleLogin('admin')">ADMIN</button>
-                    <button class="input-box" style="font-size: 10px;" onclick="handleLogin('root')">ROOT</button>
-                </div>
+    <div id="authLayer">
+        <div class="login-card">
+            <h2 style="letter-spacing:4px; color:var(--primary);">MONGLE_SYSTEMS</h2>
+            <input type="password" id="password" class="input-box" placeholder="ACCESS_KEY">
+            <button class="input-box btn-action" onclick="login('pleb')">USER LOGIN</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="input-box btn-action" style="font-size: 10px;" onclick="login('admin')">ADMIN</button>
+                <button class="input-box btn-action" style="font-size: 10px;" onclick="login('root')">ROOT</button>
             </div>
         </div>
+    </div>
 
-        <div id="arcade" style="display:none;">
-            <div class="top-bar">
-                <div id="liveClock">00:00:00</div>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="gameSearch" class="input-box" style="width:150px; margin:0;" placeholder="Filter..." onkeyup="renderGames()">
-                    <button class="input-box admin-only root-only" style="width:auto; margin:0;" onclick="toggleSettings()">⚙️</button>
-                    <button class="input-box" style="width:auto; margin:0; background:#500;" onclick="doPanic()">PANIC</button>
-                </div>
+    <div id="arcade">
+        <div class="top-bar">
+            <div id="liveClock">00:00:00</div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="gameSearch" class="input-box" style="width:150px; margin:0;" placeholder="Search..." onkeyup="renderGames()">
+                <button class="input-box btn-action admin-tool" style="width:auto; margin:0;" onclick="toggleSettings()">⚙️</button>
+                <button class="input-box btn-action" style="width:auto; margin:0; background:#500; border-color:red; color:white;" onclick="doPanic()">PANIC</button>
             </div>
-            <div class="grid" id="gameGrid"></div>
-            <div class="ticker-wrap"><div class="ticker" id="tickerContent"></div></div>
+        </div>
+        <div class="grid" id="gameGrid"></div>
+        <div class="ticker-wrap"><div class="ticker" id="tickerContent"></div></div>
+    </div>
+
+    <div id="settingsPanel" class="side-panel">
+        <div class="close-btn" onclick="toggleSettings()">X</div>
+        <h3 style="margin-top:40px; border-bottom:1px solid var(--primary); padding-bottom:10px;">SYSTEM_CONTROL</h3>
+        
+        <div class="admin-tool">
+            <label style="font-size:10px; opacity:0.7;">PANIC_URL</label>
+            <input type="text" id="prefUrl" class="input-box" placeholder="https://google.com">
+            <label style="font-size:10px; opacity:0.7;">PANIC_KEY</label>
+            <input type="text" id="prefKey" class="input-box" placeholder="e.g. ` or q">
+            <button class="input-box btn-action" onclick="savePrefs()">UPDATE LOCAL CONFIG</button>
         </div>
 
-        <div id="settingsPanel" class="side-panel">
-            <div class="close-btn" onclick="toggleSettings()">X</div>
-            <h3 style="margin-top:30px; border-bottom:1px solid var(--primary);">SYSTEM_PREFS</h3>
-            
-            <div class="admin-only root-only">
-                <label style="font-size:10px;">PANIC_URL</label>
-                <input type="text" id="prefUrl" class="input-box">
-                <label style="font-size:10px;">PANIC_KEY</label>
-                <input type="text" id="prefKey" class="input-box">
-                <button class="input-box" onclick="savePrefs()">SAVE CONFIG</button>
-            </div>
-
-            <div class="root-only" style="margin-top:20px; border-top:2px dashed gold; padding-top:15px;">
-                <h3 style="color:gold;">ROOT_CONSOLE</h3>
-                <input type="text" id="broadcastInput" class="input-box" placeholder="Global Msg...">
-                <button class="input-box" onclick="updateBroadcast()" style="color:cyan; border-color:cyan;">BROADCAST</button>
-                <button class="input-box" onclick="toggleVanish()" id="vanishBtn">VANISH: OFF</button>
-                <button class="input-box" onclick="toggleMaint()" id="maintBtn">LOCKDOWN: OFF</button>
-            </div>
-            <button class="input-box" style="margin-top:30px; color:red; border-color:red;" onclick="location.reload()">LOGOUT</button>
+        <div class="root-tool" style="margin-top:20px; border-top:2px dashed gold; padding-top:20px;">
+            <h3 style="color:gold;">ROOT_CONSOLE</h3>
+            <input type="text" id="broadcastInput" class="input-box" placeholder="Enter Global Broadcast...">
+            <button class="input-box btn-action" onclick="updateBroadcast()" style="color:cyan; border-color:cyan;">SEND BROADCAST</button>
+            <button class="input-box btn-action" id="vanishBtn" onclick="toggleVanish()">VANISH_GRID: OFF</button>
+            <button class="input-box btn-action" id="maintBtn" onclick="toggleMaint()">LOCKDOWN: OFF</button>
         </div>
+        
+        <button class="input-box btn-action" style="margin-top:30px; color:red; border-color:red;" onclick="location.reload()">TERMINATE SESSION</button>
     </div>
 
     <script type="module">
@@ -110,39 +113,65 @@
 
         let allGames = [], isRoot = false, isAdmin = false;
 
-        window.handleLogin = (type) => {
-            const pw = btoa(document.getElementById('password').value);
+        // FIXED LOGIN LOGIC
+        window.login = (type) => {
+            const val = document.getElementById('password').value;
             if (type === 'root') {
-                if (pw !== "TU9OR0xFX09XTkVSXzk5") return alert("ACCESS DENIED");
+                if (val !== "MONGLE_OWNER_99") return alert("ROOT ACCESS DENIED");
                 isRoot = true; document.body.className = "is-root";
             } else if (type === 'admin') {
-                if (pw !== "YWRtaW4xMjM=") return alert("ACCESS DENIED"); // admin123
+                if (val !== "admin123") return alert("ADMIN ACCESS DENIED");
                 isAdmin = true; document.body.className = "is-admin";
             }
+            
             document.getElementById('authLayer').style.display = 'none';
-            document.getElementById('arcade').style.display = 'block';
+            document.getElementById('arcade').style.display = 'flex';
+            
+            // Initial Load
+            document.getElementById('prefUrl').value = localStorage.getItem('m_panicUrl') || 'https://google.com';
+            document.getElementById('prefKey').value = localStorage.getItem('m_panicKey') || '`';
+            
             syncSystem(); fetchGames();
         };
 
         window.toggleSettings = () => document.getElementById('settingsPanel').classList.toggle('open');
-        window.savePrefs = () => { localStorage.setItem('m_panicUrl', document.getElementById('prefUrl').value); localStorage.setItem('m_panicKey', document.getElementById('prefKey').value); alert("SAVED"); };
-        window.doPanic = () => location.replace(localStorage.getItem('m_panicUrl') || 'https://google.com');
+        
+        window.savePrefs = () => {
+            localStorage.setItem('m_panicUrl', document.getElementById('prefUrl').value);
+            localStorage.setItem('m_panicKey', document.getElementById('prefKey').value);
+            alert("LOCAL CONFIG SAVED");
+        };
 
+        window.doPanic = () => {
+            const url = localStorage.getItem('m_panicUrl') || 'https://google.com';
+            location.replace(url);
+        };
+
+        // ROOT COMMANDS
         window.toggleMaint = () => get(ref(db, 'global/maintenance')).then(s => set(ref(db, 'global/maintenance'), !s.val()));
         window.toggleVanish = () => get(ref(db, 'global/vanish')).then(s => set(ref(db, 'global/vanish'), !s.val()));
         window.updateBroadcast = () => set(ref(db, 'global/broadcast'), document.getElementById('broadcastInput').value);
 
         function syncSystem() {
-            onValue(ref(db, 'global/broadcast'), (s) => { 
-                document.getElementById('tickerContent').innerHTML = `<span class="ticker-item">MONGLE v2.7.9</span><span class="ticker-item" style="color:cyan;">${s.val() || 'System Nominal'}</span>`;
+            onValue(ref(db, 'global/broadcast'), (s) => {
+                const msg = s.val() || "System Nominal";
+                document.getElementById('tickerContent').innerHTML = `
+                    <span class="ticker-item">MONGLE ARCADE v2.8.0</span>
+                    <span class="ticker-item" style="color:cyan; font-weight:bold;">BROADCAST: ${msg}</span>
+                    <span class="ticker-item">SESSION_ACTIVE</span>
+                `;
             });
-            onValue(ref(db, 'global/maintenance'), (s) => { 
-                if (s.val() && !isRoot) location.reload();
-                if(isRoot) document.getElementById('maintBtn').innerText = s.val() ? "LOCKDOWN: ON" : "LOCKDOWN: OFF";
+
+            onValue(ref(db, 'global/maintenance'), (s) => {
+                const locked = s.val() === true;
+                if (locked && !isRoot) location.reload();
+                if (isRoot) document.getElementById('maintBtn').innerText = locked ? "LOCKDOWN: ON" : "LOCKDOWN: OFF";
             });
+
             onValue(ref(db, 'global/vanish'), (s) => {
-                if (!isRoot) document.getElementById('gameGrid').classList.toggle('vanish-active', s.val() === true);
-                if(isRoot) document.getElementById('vanishBtn').innerText = s.val() ? "VANISH: ON" : "VANISH_GRID: OFF";
+                const active = s.val() === true;
+                if (!isRoot) document.getElementById('gameGrid').style.opacity = active ? "0" : "1";
+                if (isRoot) document.getElementById('vanishBtn').innerText = active ? "VANISH: ON" : "VANISH_GRID: OFF";
             });
         }
 
@@ -159,17 +188,29 @@
             allGames.forEach(game => {
                 const name = game.name.replace('.html', '').replace(/_/g, ' ');
                 if (query && !name.toLowerCase().includes(query)) return;
-                grid.innerHTML += `<div class="game-card" onclick="window.open('https://raw.githack.com/bob154526-hue/Mongle/main/${game.name}','_blank')">
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
                     <img class="game-icon" src="https://raw.githubusercontent.com/bob154526-hue/Mongle/main/icons/${game.name.replace('.html', '.png')}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/686/686588.png'">
-                    <span class="game-title">${name}</span></div>`;
+                    <span class="game-title">${name}</span>
+                `;
+                card.onclick = () => window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${game.name}`, '_blank');
+                grid.appendChild(card);
             });
         };
 
+        // HOTKEYS
         document.addEventListener('keydown', (e) => {
             if (e.key === localStorage.getItem('m_panicKey')) doPanic();
-            if (e.shiftKey && e.key === 'L') { document.getElementById('lockdownScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; }
+            // SHIFT+L to bypass "404" screen if lockdown is active
+            if (e.shiftKey && e.key === 'L') {
+                document.getElementById('lockdownScreen').style.display = 'none';
+            }
         });
-        setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
+        setInterval(() => {
+            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
     </script>
 </body>
 </html>
