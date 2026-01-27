@@ -6,72 +6,58 @@
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <style>
         :root { --primary: #00d2ff; --bg: #000810; --card: rgba(0, 18, 32, 0.95); --accent: #002233; --panic: #ef4444; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        
-        /* Particle Background */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: #e2e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-
-        /* Auth Layer */
         #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; align-items: center; justify-content: center; }
-        .login-box { width: 340px; padding: 40px; background: #000; border: 1px solid var(--accent); border-radius: 15px; text-align: center; box-shadow: 0 0 40px rgba(0, 210, 255, 0.1); }
-        
-        /* Main UI */
+        .login-box { width: 340px; padding: 40px; background: #000; border: 1px solid var(--accent); border-radius: 15px; text-align: center; }
         .top-bar { position: relative; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.85); border-bottom: 1px solid var(--accent); backdrop-filter: blur(10px); }
         .grid { position: relative; z-index: 10; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 40px; height: calc(100vh - 85px); overflow-y: auto; }
-        
-        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 20px; padding: 30px 15px; text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 210, 255, 0.1); }
-        .game-logo { font-size: 50px; margin-bottom: 15px; display: block; filter: drop-shadow(0 0 10px var(--primary)); }
-
-        /* Owner Console */
+        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 20px; padding: 30px 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); }
         #settingsPanel { position: fixed; top: 0; right: -350px; width: 320px; height: 100vh; background: rgba(0,5,10,0.98); border-left: 2px solid var(--primary); z-index: 2000; transition: 0.4s; padding: 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         #settingsPanel.open { right: 0; }
-
         .search-input { background: #000; border: 1px solid #004466; color: white; padding: 10px 15px; border-radius: 8px; outline: none; width: 100%; box-sizing: border-box; }
-        #announcementBar { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 15px 50px; border-radius: 0 0 20px 20px; font-weight: bold; transition: 0.6s; z-index: 6000; box-shadow: 0 0 20px var(--primary); }
-        
+        #announcementBar { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 15px 50px; border-radius: 0 0 20px 20px; font-weight: bold; transition: 0.6s; z-index: 6000; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
-    <div id="announcementBar">MAINTENANCE ACTIVE</div>
+    <div id="announcementBar">SITE UNDER MAINTENANCE</div>
 
     <div id="authLayer">
         <div class="login-box">
-            <h1 style="color:var(--primary); letter-spacing:10px; margin-bottom:30px;">MONGLE</h1>
+            <h1 style="color:var(--primary); letter-spacing:10px;">MONGLE</h1>
             <input type="text" id="username" class="search-input" style="margin-bottom:12px;" placeholder="Username">
             <input type="password" id="password" class="search-input" style="margin-bottom:25px;" placeholder="Security Key">
-            <button class="search-input" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;" onclick="handleLogin('pleb')">ACCESS ARCADE</button>
-            <button onclick="handleLogin('root')" style="margin-top:25px; background:none; border:none; color:#111; font-size:10px; cursor:pointer;">[OVERRIDE]</button>
+            <button class="search-input" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;" onclick="handleLogin('pleb')">ACCESS</button>
+            <button onclick="handleLogin('root')" style="margin-top:25px; background:none; border:none; color:#111; font-size:10px; cursor:pointer;">[ROOT]</button>
         </div>
     </div>
 
     <div id="arcade" class="hidden">
         <div class="top-bar">
-            <div id="liveClock" style="color:var(--primary); font-family:monospace; font-weight:bold;">00:00:00</div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <input type="text" id="gameSearch" class="search-input" style="width:220px;" placeholder="Search games..." oninput="filterGames()">
-                <button id="settingsBtn" class="search-input" style="display:none; color:var(--primary); width:auto; cursor:pointer;" onclick="toggleSettings()">⚙️</button>
-                <button class="search-input" style="background:var(--panic); color:white; border:none; width:auto; font-weight:bold;" onclick="location.replace('https://classroom.google.com')">PANIC</button>
+            <div id="liveClock" style="color:var(--primary); font-family:monospace;">00:00:00</div>
+            <div style="display:flex; gap:12px;">
+                <input type="text" id="gameSearch" class="search-input" style="width:200px;" placeholder="Search..." oninput="filterGames()">
+                <button id="settingsBtn" class="search-input" style="display:none; color:var(--primary); width:auto;" onclick="toggleSettings()">⚙️</button>
+                <button class="search-input" style="background:var(--panic); color:white; border:none; width:auto;" onclick="location.replace('https://classroom.google.com')">PANIC</button>
             </div>
         </div>
         <div class="grid" id="gameGrid"></div>
     </div>
 
     <div id="settingsPanel">
-        <h2 style="color:var(--primary); font-size:18px; margin-bottom:20px;">OWNER CONSOLE</h2>
-        <button id="maintBtn" class="search-input" style="background:#222; color:white; margin-bottom:25px;" onclick="toggleMaintenance()">STATUS: LOADING...</button>
-        
-        <div style="margin-bottom:25px;">
-            <h4 style="font-size:11px; color:#58a; text-transform:uppercase; margin-bottom:10px;">Broadcast Message</h4>
-            <input type="text" id="broadcastMsg" class="search-input" style="margin-bottom:8px;" placeholder="Type alert here...">
-            <button class="search-input" style="background:var(--primary); color:#000; font-weight:bold;" onclick="sendBroadcast()">SEND TO ALL</button>
+        <h2 style="color:var(--primary); font-size:18px;">OWNER CONSOLE</h2>
+        <button id="maintBtn" class="search-input" style="background:#f44; color:white;" onclick="toggleMaintenance()">LOCKDOWN: ON</button>
+        <div style="margin-top:20px;">
+            <h4 style="font-size:11px; color:#58a;">BROADCAST</h4>
+            <input type="text" id="broadcastMsg" class="search-input" placeholder="Type message...">
+            <button class="search-input" style="background:var(--primary); color:#000; margin-top:5px;" onclick="sendBroadcast()">SEND</button>
         </div>
-
-        <div>
-            <h4 style="font-size:11px; color:#58a; text-transform:uppercase; margin-bottom:10px;">Active Plebs</h4>
-            <div id="userList" style="max-height:300px; overflow-y:auto;"></div>
+        <div style="margin-top:20px;">
+            <h4 style="font-size:11px; color:#58a;">PLAYER LOG</h4>
+            <div id="userList"></div>
         </div>
     </div>
 
@@ -90,25 +76,23 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- AUTH LOGIC (Key: MONGLE_OWNER_99) ---
+        // --- AUTH ---
         window.handleLogin = function(type) {
             let user = document.getElementById('username').value.trim() || "Guest";
-            const passInput = document.getElementById('password').value;
-            const passEncoded = btoa(passInput);
+            const pass = btoa(document.getElementById('password').value);
             let role = 'pleb';
 
-            if(type === 'root' && passEncoded === "TU9OR0xFX09XTkVSXzk5") { 
-                role = 'root'; user = "OWNER_" + Math.floor(Math.random()*99); 
+            if(type === 'root' && pass === "TU9OR0xFX09XTkVSXzk5") { 
+                role = 'root'; user = "OWNER"; 
             } else if(type === 'pleb' && user) { 
                 role = 'pleb'; 
-            } else { return alert("Access Denied"); }
+            } else { return alert("Denied"); }
 
             sessionStorage.setItem('mUser', user);
             sessionStorage.setItem('mRole', role);
             
-            const statusRef = ref(db, 'status/' + user.replace(/\s+/g, '_'));
-            set(statusRef, { name: user, role: role, time: Date.now() });
-            onDisconnect(statusRef).remove();
+            set(ref(db, 'status/' + user), { name: user, role: role, time: Date.now() });
+            onDisconnect(ref(db, 'status/' + user)).remove();
 
             document.getElementById('authLayer').classList.add('hidden');
             document.getElementById('arcade').classList.remove('hidden');
@@ -119,10 +103,10 @@
                 trackUsers();
             }
             loadGames();
-            listenToSystem();
+            syncSystem();
         };
 
-        // --- GAME ENGINE (Githack Fix) ---
+        // --- GAME ENGINE ---
         async function loadGames() {
             const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
             const items = await res.json();
@@ -132,11 +116,11 @@
                     const cleanName = item.name.replace('.html', '').replace(/_/g, ' ');
                     const d = document.createElement('div');
                     d.className = 'game-card';
-                    d.innerHTML = `<span class="game-logo">🎮</span><h3>${cleanName}</h3>`;
+                    d.innerHTML = `<span style="font-size:45px;">🎮</span><h3>${cleanName}</h3>`;
                     d.onclick = () => {
-                        const renderUrl = `https://raw.githack.com/bob154526-hue/Mongle/main/${item.name}`;
+                        const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${item.name}`;
                         const win = window.open('about:blank', '_blank');
-                        win.document.write(`<html><body style="margin:0;background:#000;overflow:hidden;"><iframe src="${renderUrl}" style="border:none;width:100vw;height:100vh;"></iframe></body></html>`);
+                        win.document.write(`<html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;"></iframe></body></html>`);
                     };
                     grid.appendChild(d);
                 }
@@ -144,64 +128,44 @@
         }
 
         // --- SYSTEM SYNC ---
-        function listenToSystem() {
-            onValue(ref(db, 'global/maintenance'), (snap) => {
-                const isLocked = snap.val();
-                const myRole = sessionStorage.getItem('mRole');
-                const btn = document.getElementById('maintBtn');
-                
-                btn.innerText = isLocked ? "STATUS: LOCKED" : "STATUS: PUBLIC";
-                btn.style.background = isLocked ? "#f44" : "#111";
-
-                if(isLocked && myRole === 'pleb') {
-                    location.replace('https://classroom.google.com');
-                }
+        function syncSystem() {
+            onValue(ref(db, 'global/maintenance'), (s) => {
+                const isLocked = s.val() !== false; // Default to locked
+                if(isLocked && sessionStorage.getItem('mRole') === 'pleb') location.replace('https://classroom.google.com');
+                document.getElementById('maintBtn').innerText = isLocked ? "LOCKDOWN: ON" : "LOCKDOWN: OFF";
+                document.getElementById('maintBtn').style.background = isLocked ? "#f44" : "#111";
             });
-
-            onValue(ref(db, 'global/announcement'), (snap) => {
-                const data = snap.val(); if(!data) return;
-                const bar = document.getElementById('announcementBar');
-                bar.innerText = data.text; bar.style.top = "0px";
-                setTimeout(() => { bar.style.top = "-80px"; }, 6000);
+            onValue(ref(db, 'global/announcement'), (s) => {
+                const d = s.val(); if(!d) return;
+                const b = document.getElementById('announcementBar');
+                b.innerText = d.text; b.style.top = "0px";
+                setTimeout(() => b.style.top = "-80px", 6000);
             });
         }
 
         function trackUsers() {
-            onValue(ref(db, 'status'), (snap) => {
+            onValue(ref(db, 'status'), (s) => {
                 const list = document.getElementById('userList'); list.innerHTML = "";
-                snap.forEach(child => {
-                    const u = child.val();
+                s.forEach(c => {
+                    const u = c.val();
                     const row = document.createElement('div');
-                    row.style = "display:flex; justify-content:space-between; margin-bottom:8px; background:rgba(255,255,255,0.05); padding:8px; border-radius:6px; font-size:12px;";
-                    row.innerHTML = `<span>${u.name}</span><button onclick="kickUser('${child.key}')" style="background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">KICK</button>`;
+                    row.style = "display:flex; justify-content:space-between; margin-bottom:5px; background:#111; padding:8px; border-radius:5px;";
+                    row.innerHTML = `<span>${u.name}</span><button onclick="kickUser('${c.key}')" style="background:red; color:white; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">KICK</button>`;
                     list.appendChild(row);
                 });
             });
         }
 
-        // --- OWNER UTILITIES ---
         window.kickUser = (id) => set(ref(db, 'kicks/' + id), true);
-        window.sendBroadcast = () => {
-            const msg = document.getElementById('broadcastMsg').value;
-            set(ref(db, 'global/announcement'), { text: msg, time: Date.now() });
-            document.getElementById('broadcastMsg').value = "";
-        };
-        window.toggleMaintenance = () => {
-            get(ref(db, 'global/maintenance')).then(s => set(ref(db, 'global/maintenance'), !s.val()));
-        };
+        window.sendBroadcast = () => set(ref(db, 'global/announcement'), { text: document.getElementById('broadcastMsg').value });
+        window.toggleMaintenance = () => get(ref(db, 'global/maintenance')).then(s => set(ref(db, 'global/maintenance'), !s.val()));
         window.toggleSettings = () => document.getElementById('settingsPanel').classList.toggle('open');
-        window.filterGames = () => {
-            const q = document.getElementById('gameSearch').value.toLowerCase();
-            document.querySelectorAll('.game-card').forEach(c => {
-                c.classList.toggle('hidden', !c.innerText.toLowerCase().includes(q));
-            });
-        };
-
-        // --- VISUALS ---
+        
+        // Particles
         const cvs = document.getElementById('particleCanvas'); const ctx = cvs.getContext('2d');
         let pts = []; function rsz() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }
         window.onresize = rsz; rsz();
-        for(let i=0; i<60; i++) pts.push({x: Math.random()*cvs.width, y: Math.random()*cvs.height, v: 0.1+Math.random()*0.3});
+        for(let i=0; i<50; i++) pts.push({x: Math.random()*cvs.width, y: Math.random()*cvs.height, v: 0.2});
         function loop() {
             ctx.clearRect(0,0,cvs.width,cvs.height); ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
             pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 1.2, 0, 7); ctx.fill(); p.y -= p.v; if(p.y < 0) p.y = cvs.height; });
