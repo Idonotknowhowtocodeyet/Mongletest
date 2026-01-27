@@ -8,57 +8,59 @@
         :root { --primary: #00ff41; --bg: #000500; --card: rgba(15, 15, 15, 0.95); --accent: #003b00; --gold: #ffd700; --spotlight: #00ccff; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Courier New', monospace; overflow: hidden; }
 
-        /* 404 ERROR SCREEN */
+        /* 404 SCREEN */
         #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; font-family: arial, sans-serif; text-align: center; }
-        #lockdownScreen h1 { font-size: 22px; color: #222; margin-bottom: 10px; }
-        #lockdownScreen p { font-size: 14px; color: #555; }
-
-        /* MAIN APP */
-        #mainApp { display: none; height: 100%; }
         
         /* LOGIN LAYER */
-        #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 10px solid #000; }
-        .login-card { width: 340px; padding: 40px; border: 1px solid var(--primary); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        #mainApp { display: none; height: 100%; }
+        #authLayer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-card { width: 340px; padding: 40px; border: 1px solid var(--primary); text-align: center; background: #000800; }
         
         /* ARCADE UI */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--primary); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid var(--primary); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 30px; height: calc(100vh - 100px); overflow-y: auto; align-content: start; }
         
-        .category-header { grid-column: 1 / -1; color: var(--gold); border-bottom: 2px solid var(--gold); margin: 30px 0 10px 0; font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-        .spotlight-header { color: var(--spotlight); border-color: var(--spotlight); text-shadow: 0 0 10px var(--spotlight); }
+        /* HEADERS */
+        .category-header { grid-column: 1 / -1; color: var(--gold); border-bottom: 2px solid var(--gold); margin: 30px 0 10px 0; font-size: 18px; font-weight: bold; }
+        .spotlight-header { color: var(--spotlight); border-color: var(--spotlight); }
 
-        /* GAME CARDS & TEXT */
-        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; margin-bottom: 12px; background: #111; }
-        .game-title { color: white !important; font-size: 13px; font-weight: bold; display: block; margin-top: 5px; }
+        /* CARDS */
+        .game-card { background: var(--card); border: 1px solid #111; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+        .game-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 5px; object-fit: cover; margin-bottom: 12px; }
+        .game-title { color: #ffffff !important; font-size: 13px; font-weight: bold; display: block; }
 
-        /* ROOT CONTROLS */
-        .fav-star { position: absolute; top: 10px; right: 10px; font-size: 24px; color: rgba(255,255,255,0.1); display: none; }
+        /* SETTINGS PANEL */
+        .side-panel { position: fixed; top: 0; right: -350px; width: 300px; height: 100vh; background: #000; border-left: 1px solid var(--primary); z-index: 6000; transition: 0.4s; padding: 25px; box-shadow: -10px 0 20px rgba(0,0,0,0.5); }
+        .side-panel.open { right: 0; }
+
+        .fav-star { position: absolute; top: 8px; right: 8px; font-size: 22px; color: rgba(255,255,255,0.05); display: none; }
         .root-mode .fav-star { display: block; }
         .fav-star.active { color: var(--spotlight); }
 
-        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; outline: none; font-family: inherit; }
+        .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        .panic-btn { background: #550000; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .panic-btn:hover { background: #aa0000; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="lockdownScreen">
-        <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" style="margin-bottom:20px; width:60px;">
+        <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" style="width:50px; margin-bottom:15px;">
         <h1>404. That’s an error.</h1>
-        <p>The requested URL was not found on this server. <br> <span style="color:#888; font-size:12px;">That’s all we know.</span></p>
+        <p>The requested URL was not found on this server.</p>
     </div>
 
     <div id="mainApp">
         <div id="authLayer">
             <div class="login-card">
-                <h2 style="letter-spacing:5px; margin-bottom:30px;">MONGLE_OS</h2>
-                <input type="text" id="username" class="input-box" placeholder="USER_ID">
-                <input type="password" id="password" class="input-box" placeholder="SEC_KEY">
-                <button class="input-box" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;" onclick="handleLogin('pleb')">INITIALIZE</button>
-                <div style="margin-top:10px;">
-                    <button style="background:none; border:none; color:#222; font-size:10px; cursor:pointer;" onclick="handleLogin('root')">ROOT_CONSOLE</button>
+                <h2 style="letter-spacing:4px; margin-bottom:25px;">MONGLE_SYSTEMS</h2>
+                <input type="password" id="password" class="input-box" placeholder="ACCESS_KEY">
+                <button class="input-box" style="background:var(--primary); color:#000; font-weight:bold;" onclick="handleLogin('pleb')">INITIALIZE</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="input-box" style="font-size: 10px; border-color: #555;" onclick="handleLogin('admin')">ADMIN</button>
+                    <button class="input-box" style="font-size: 10px; border-color: #555;" onclick="handleLogin('root')">ROOT</button>
                 </div>
             </div>
         </div>
@@ -66,10 +68,23 @@
         <div id="arcade" class="hidden">
             <div class="top-bar">
                 <div id="liveClock">00:00:00</div>
-                <input type="text" id="gameSearch" class="input-box" style="width:300px; margin:0;" placeholder="SEARCH_DB..." onkeyup="renderGames()">
-                <button class="input-box" style="width:auto; margin:0; background:#330000; color:red; border-color:red;" onclick="location.reload()">LOGOUT</button>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" id="gameSearch" class="input-box" style="width:200px; margin:0;" placeholder="Search..." onkeyup="renderGames()">
+                    <button class="input-box" style="width:auto; margin:0;" onclick="toggleSettings()">⚙️</button>
+                    <button class="input-box panic-btn" style="width:auto; margin:0;" onclick="doPanic()">PANIC</button>
+                </div>
             </div>
             <div class="grid" id="gameGrid"></div>
+        </div>
+
+        <div id="settingsPanel" class="side-panel">
+            <h3 style="border-bottom: 1px solid var(--primary);">SYSTEM_PREFS</h3>
+            <label style="font-size: 10px;">PANIC_URL</label>
+            <input type="text" id="prefUrl" class="input-box" placeholder="https://google.com">
+            <label style="font-size: 10px;">PANIC_KEY (e.g. 'q')</label>
+            <input type="text" id="prefKey" class="input-box" placeholder="Key Name">
+            <button class="input-box" style="background:var(--primary); color:#000;" onclick="savePrefs()">SAVE CONFIG</button>
+            <button class="input-box" style="margin-top:20px; border-color:red; color:red;" onclick="location.reload()">TERMINATE SESSION</button>
         </div>
     </div>
 
@@ -86,11 +101,18 @@
         const db = getDatabase(app);
 
         let allGames = [];
-        let globalFavorites = [];
+        let globalSpotlight = [];
         let isRoot = false;
 
-        // Shift + L Bypass
+        // LOAD PREFS
+        document.getElementById('prefUrl').value = localStorage.getItem('m_panicUrl') || 'https://classroom.google.com';
+        document.getElementById('prefKey').value = localStorage.getItem('m_panicKey') || '`';
+
+        // GLOBAL KEY LISTENER
         document.addEventListener('keydown', (e) => {
+            // Panic Key
+            if (e.key === localStorage.getItem('m_panicKey')) doPanic();
+            // Bypass Key
             if (e.shiftKey && e.key === 'L') {
                 document.getElementById('lockdownScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
@@ -105,8 +127,10 @@
             }
             document.getElementById('authLayer').classList.add('hidden');
             document.getElementById('arcade').classList.remove('hidden');
-            fetchGames();
-            syncGlobalFavs();
+            onValue(ref(db, 'global/spotlight'), (s) => {
+                globalSpotlight = s.val() || [];
+                fetchGames(); 
+            });
         };
 
         async function fetchGames() {
@@ -116,19 +140,10 @@
             renderGames();
         }
 
-        function syncGlobalFavs() {
-            onValue(ref(db, 'global/spotlight'), (snapshot) => {
-                globalFavorites = snapshot.val() || [];
-                renderGames();
-            });
-        }
-
         window.toggleGlobalFav = (e, filename) => {
             e.stopPropagation();
             if (!isRoot) return;
-            let newFavs = globalFavorites.includes(filename) 
-                ? globalFavorites.filter(f => f !== filename) 
-                : [...globalFavorites, filename];
+            let newFavs = globalSpotlight.includes(filename) ? globalSpotlight.filter(f => f !== filename) : [...globalSpotlight, filename];
             set(ref(db, 'global/spotlight'), newFavs);
         };
 
@@ -136,42 +151,43 @@
             const query = document.getElementById('gameSearch').value.toLowerCase();
             const grid = document.getElementById('gameGrid');
             grid.innerHTML = "";
-
-            const groups = { "🏆 BEST OF THE WEEK": [], "🐻 Freddy's Collection": [], "🕹️ All Games": [] };
+            const sections = { "🏆 BEST OF THE WEEK": [], "🐻 Freddy's Collection": [], "🕹️ All Games": [] };
             
             allGames.forEach(game => {
-                const cleanName = game.name.replace('.html', '').replace(/_/g, ' ');
-                if (query && !cleanName.toLowerCase().includes(query)) return;
-
-                const isSpotlight = globalFavorites.includes(game.name);
-                const gameObj = {
-                    name: cleanName, filename: game.name, isSpotlight,
+                const nameClean = game.name.replace('.html', '').replace(/_/g, ' ');
+                if (query && !nameClean.toLowerCase().includes(query)) return;
+                const isSpotted = globalSpotlight.includes(game.name);
+                const obj = { name: nameClean, filename: game.name, isSpotted,
                     url: `https://raw.githack.com/bob154526-hue/Mongle/main/${game.name}`,
                     icon: `https://raw.githubusercontent.com/bob154526-hue/Mongle/main/icons/${game.name.replace('.html', '.png')}`
                 };
-
-                if (isSpotlight) groups["🏆 BEST OF THE WEEK"].push(gameObj);
-                else if (cleanName.toLowerCase().match(/freddy|fnaf|sister location|pizza simulator/)) groups["🐻 Freddy's Collection"].push(gameObj);
-                else groups["🕹️ All Games"].push(gameObj);
+                if (isSpotted) sections["🏆 BEST OF THE WEEK"].push(obj);
+                else if (nameClean.toLowerCase().match(/freddy|fnaf|sister location|pizza simulator/)) sections["🐻 Freddy's Collection"].push(obj);
+                else sections["🕹️ All Games"].push(obj);
             });
 
-            for (const [title, games] of Object.entries(groups)) {
-                if (!games.length) continue;
+            for (const [title, games] of Object.entries(sections)) {
+                if (games.length === 0) continue;
                 grid.innerHTML += `<div class="category-header ${title.includes('WEEK') ? 'spotlight-header' : ''}">${title}</div>`;
                 games.forEach(g => {
                     const card = document.createElement('div');
                     card.className = 'game-card';
-                    card.innerHTML = `
-                        <div class="fav-star ${g.isSpotlight ? 'active' : ''}" onclick="toggleGlobalFav(event, '${g.filename}')">★</div>
+                    card.innerHTML = `<div class="fav-star ${g.isSpotted ? 'active' : ''}" onclick="toggleGlobalFav(event, '${g.filename}')">★</div>
                         <img class="game-icon" src="${g.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/686/686588.png'">
-                        <span class="game-title">${g.name}</span>
-                    `;
+                        <span class="game-title">${g.name}</span>`;
                     card.onclick = () => window.open(g.url, '_blank');
                     grid.appendChild(card);
                 });
             }
         };
 
+        window.toggleSettings = () => document.getElementById('settingsPanel').classList.toggle('open');
+        window.savePrefs = () => {
+            localStorage.setItem('m_panicUrl', document.getElementById('prefUrl').value);
+            localStorage.setItem('m_panicKey', document.getElementById('prefKey').value);
+            alert("CONFIG SAVED");
+        };
+        window.doPanic = () => location.replace(localStorage.getItem('m_panicUrl') || 'https://classroom.google.com');
         setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString(); }, 1000);
     </script>
 </body>
