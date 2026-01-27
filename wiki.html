@@ -1,81 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Panel</title>
+    <title>Settings</title>
     <style>
-        body { background: #2e0a0a; color: #fff; font-family: sans-serif; padding: 40px; }
-        .hidden { display: none; }
-        .box { background: #1d1111; padding: 25px; border-radius: 15px; border: 1px solid #371f1f; margin-bottom: 20px; max-width: 500px; margin-inline: auto; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; }
-        .btn { width: 100%; padding: 12px; border: none; background: #ff4040; color: #fff; font-weight: bold; cursor: pointer; border-radius: 8px; }
-        #keyDisplay { color: #ff4040; font-weight: bold; font-family: monospace; font-size: 1.2rem; background: #000; padding: 2px 8px; border-radius: 4px; }
+        body { background: #2e0a0a; color: #fff; font-family: sans-serif; padding: 20px; }
+        .box { background: #1d1111; padding: 20px; border-radius: 12px; border: 1px solid #371f1f; margin-bottom: 20px; max-width: 500px; margin-inline: auto; }
+        .btn { width: 100%; padding: 12px; background: #ff4040; border: none; color: #fff; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 10px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; color: #fff; border: 1px solid #444; }
+        .admin-only { display: none; border: 2px solid gold; }
     </style>
 </head>
 <body>
-    <div id="lock" style="text-align:center; padding-top:100px;">
-        <h2>🔐 Admin Access</h2>
-        <input type="password" id="pass" placeholder="Password">
-        <button class="btn" style="width:200px" onclick="check()">Unlock</button>
+    <div id="userSection">
+        <div class="box">
+            <h3>🎮 Your Settings</h3>
+            <p>Your Panic Key: <b id="uKey">Escape</b></p>
+            <button class="btn" onclick="recordKey()">Record My Panic Key</button>
+            <hr>
+            <h3>📊 Your Stats</h3>
+            <p>Games Played: <span id="localPlays">0</span></p>
+        </div>
     </div>
 
-    <div id="admin" class="hidden">
-        <h2 style="text-align:center;">🔴 System Control</h2>
-
+    <div id="adminSection" class="admin-only">
+        <h2 style="text-align:center; color:gold;">👑 SUPER ADMIN</h2>
         <div class="box">
-            <h3>🛑 Panic Key Configuration</h3>
-            <p>Active Key: <span id="keyDisplay">Escape</span></p>
-            <button class="btn" id="recordBtn" onclick="startRecord()">Click to Record New Key</button>
-            <input type="text" id="pUrl" placeholder="Panic Redirect URL">
-            <button class="btn" style="background:#882222; margin-top:10px;" onclick="savePanic()">Save Panic Settings</button>
+            <h3>🐢 Global Pranks (April Fools)</h3>
+            <input type="text" id="gBG" placeholder="Global Background URL">
+            <input type="text" id="gEmoji" placeholder="Global Emoji (e.g. 🐢)">
+            <button class="btn" onclick="applyGlobal()">Apply to ALL Users</button>
+            <button class="btn" style="background:#444" onclick="localStorage.removeItem('globalBG'); localStorage.removeItem('globalEmoji'); alert('Reset!');">Reset Prank</button>
         </div>
-
-        <div class="box" style="text-align:center;">
-            <h3>📊 Visitor Stats</h3>
+        <div class="box">
+            <h3>🚫 Ban Management</h3>
+            <input type="text" id="banUser" placeholder="Enter IP or Device ID (Simulated)">
+            <button class="btn" style="background:black" onclick="localStorage.setItem('banned', 'true'); alert('User Banned!')">Ban Cheater</button>
+            <button class="btn" style="background:green" onclick="localStorage.removeItem('banned'); alert('Unbanned!')">Unban All</button>
+        </div>
+        <div class="box">
+            <h3>📊 Master Analytics</h3>
             <img src="https://count.getloli.com/get/@bob-mongle-mongle?theme=moebooru">
         </div>
-
-        <div class="box">
-            <h3>🎨 Arcade Appearance</h3>
-            <input type="text" id="fName" placeholder="filename.html">
-            <input type="text" id="emoji" placeholder="New Emoji">
-            <button class="btn" onclick="saveEmoji()">Update Icon</button>
-        </div>
-
-        <p style="text-align:center;"><a href="index.html" style="color:#ff4040; text-decoration:none; font-weight:bold;">← Return to Arcade</a></p>
     </div>
 
-    <script>
-        document.getElementById('keyDisplay').innerText = localStorage.getItem('panicKey') || 'Escape';
-        document.getElementById('pUrl').value = localStorage.getItem('panicUrl') || 'https://classroom.google.com';
+    <p style="text-align:center;"><a href="index.html" style="color:red">← Back</a></p>
 
-        function check() { if(document.getElementById('pass').value === "1234"){ document.getElementById('lock').className='hidden'; document.getElementById('admin').className=''; } }
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('mode') === 'admin') {
+            let p = prompt("Enter Super Admin Password:");
+            if(p === "1234") document.getElementById('adminSection').style.display = 'block';
+        }
+
+        document.getElementById('uKey').innerText = localStorage.getItem('panicKey_user') || 'Escape';
         
-        function startRecord() {
-            const btn = document.getElementById('recordBtn');
-            btn.innerText = "LISTENING... PRESS ANY KEY";
-            btn.style.background = "#fff"; btn.style.color = "#000";
-            
+        function recordKey() {
             window.onkeydown = (e) => {
-                e.preventDefault();
-                localStorage.setItem('panicKey', e.key);
-                document.getElementById('keyDisplay').innerText = e.key;
-                btn.innerText = "Click to Record New Key";
-                btn.style.background = "#ff4040"; btn.style.color = "#fff";
+                localStorage.setItem('panicKey_user', e.key);
+                document.getElementById('uKey').innerText = e.key;
                 window.onkeydown = null;
-                alert(`Panic Key bound to: ${e.key}`);
+                alert("Your personal panic key is set!");
             };
         }
 
-        function savePanic() {
-            localStorage.setItem('panicUrl', document.getElementById('pUrl').value);
-            alert("Panic settings updated!");
-        }
-
-        function saveEmoji() {
-            let i = JSON.parse(localStorage.getItem('mongleIcons')) || {};
-            i[document.getElementById('fName').value] = document.getElementById('emoji').value;
-            localStorage.setItem('mongleIcons', JSON.stringify(i));
-            alert("Icon updated!");
+        function applyGlobal() {
+            localStorage.setItem('globalBG', document.getElementById('gBG').value);
+            localStorage.setItem('globalEmoji', document.getElementById('gEmoji').value);
+            alert("Global prank active!");
         }
     </script>
 </body>
