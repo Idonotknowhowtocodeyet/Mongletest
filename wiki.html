@@ -3,12 +3,12 @@
 <head>
     <title>Settings</title>
     <style>
-        body { background: #05070a; color: #fff; font-family: sans-serif; padding: 40px; }
+        body { background: #0a2e0a; color: #fff; font-family: sans-serif; padding: 40px; }
         .hidden { display: none; }
-        .box { background: #11141d; padding: 25px; border-radius: 15px; border: 1px solid #1f2937; margin-bottom: 20px; max-width: 500px; margin-inline: auto; }
+        .box { background: #111d11; padding: 25px; border-radius: 15px; border: 1px solid #1f371f; margin-bottom: 20px; max-width: 500px; margin-inline: auto; }
         input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; }
-        .btn { width: 100%; padding: 12px; border: none; background: #00d2ff; color: #000; font-weight: bold; cursor: pointer; border-radius: 8px; }
-        #keyDisplay { color: #00d2ff; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
+        .btn { width: 100%; padding: 12px; border: none; background: #00ff40; color: #000; font-weight: bold; cursor: pointer; border-radius: 8px; }
+        #keyDisplay { color: #00ff40; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -25,8 +25,8 @@
             <h3>🛑 Panic Settings</h3>
             <p>Panic Key: <span id="keyDisplay">Escape</span></p>
             <button class="btn" id="recordBtn" onclick="startRecord()">Record New Key</button>
-            <input type="text" id="pUrl" placeholder="Panic Redirect Link (https://...)">
-            <button class="btn" style="background:#58a6ff; margin-top:10px;" onclick="savePanic()">Save Panic Link</button>
+            <input type="text" id="pUrl" placeholder="Panic Redirect Link">
+            <button class="btn" style="background:#44aa44; margin-top:10px;" onclick="savePanic()">Save Panic Link</button>
         </div>
 
         <div class="box">
@@ -39,20 +39,10 @@
             <button class="btn" onclick="saveEmoji()">Set Emoji</button>
         </div>
 
-        <div class="box">
-            <h3>🎭 Stealth Presets</h3>
-            <select id="preset" onchange="applyTab(this.value)">
-                <option value="">-- Choose Mask --</option>
-                <option value="drive">Google Drive</option>
-                <option value="classroom">Google Classroom</option>
-            </select>
-        </div>
-
-        <p style="text-align:center;"><a href="index.html" style="color:#00d2ff; text-decoration:none;">← Back to Arcade</a></p>
+        <p style="text-align:center;"><a href="index.html" style="color:#00ff40; text-decoration:none;">← Back to Arcade</a></p>
     </div>
 
     <script>
-        // Init display
         document.getElementById('keyDisplay').innerText = localStorage.getItem('panicKey') || 'Escape';
         document.getElementById('pUrl').value = localStorage.getItem('panicUrl') || 'https://classroom.google.com';
 
@@ -62,14 +52,13 @@
             const btn = document.getElementById('recordBtn');
             btn.innerText = "PRESS ANY KEY...";
             btn.style.background = "#ff7b72";
-            
             window.onkeydown = (e) => {
                 e.preventDefault();
                 localStorage.setItem('panicKey', e.key);
                 document.getElementById('keyDisplay').innerText = e.key;
                 btn.innerText = "Record New Key";
-                btn.style.background = "#00d2ff";
-                window.onkeydown = null; // Stop listening
+                btn.style.background = "#00ff40";
+                window.onkeydown = null;
                 alert(`Panic Key set to: ${e.key}`);
             };
         }
@@ -84,18 +73,6 @@
             i[document.getElementById('fName').value] = document.getElementById('emoji').value;
             localStorage.setItem('mongleIcons', JSON.stringify(i));
             alert("Emoji Set!");
-        }
-
-        function applyTab(val) {
-            const masks = {
-                drive: ["My Drive - Google Drive", "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png"],
-                classroom: ["Classes", "https://ssl.gstatic.com/classroom/favicon.png"]
-            };
-            if(masks[val]) {
-                localStorage.setItem('tabTitle', masks[val][0]);
-                localStorage.setItem('tabIcon', masks[val][1]);
-                alert("Mask Applied! Refresh Arcade.");
-            }
         }
     </script>
 </body>
