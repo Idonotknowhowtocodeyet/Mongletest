@@ -8,75 +8,66 @@
         :root { --primary: #00ff41; --bg: #000500; --card: rgba(0, 20, 0, 0.9); --accent: #003b00; --panic: #ff3131; --pin: #ffcc00; --trending: #00ccff; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Courier New', monospace; overflow: hidden; }
 
-        /* CHAOS STYLES */
-        .shake { animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } 100% { transform: translate(0, 0); } }
-        
+        /* CHAOS EFFECTS */
         #hackerOverlay { display: none; position: fixed; inset: 0; background: #000; z-index: 10001; color: #0f0; padding: 20px; font-size: 14px; overflow: hidden; white-space: pre-wrap; }
         #seizedOverlay { display: none; position: fixed; inset: 0; background: #000; z-index: 10002; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; }
-        
-        /* JUMPSCARE OVERLAY */
-        #scareOverlay { display: none; position: fixed; inset: 0; background: #000; z-index: 20000; align-items: center; justify-content: center; }
-        #scareImage { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(200%); }
+        .ghost-active { cursor: none !important; }
+        #fakeCursor { display: none; position: fixed; width: 20px; height: 20px; pointer-events: none; z-index: 30000; }
 
-        #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: black; text-align: center; }
+        /* APP UI */
+        #lockdownScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: black; }
         #mainApp { display: none; height: 100vh; flex-direction: column; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--primary); }
-        .grid-container { flex-grow: 1; overflow-y: auto; padding-bottom: 80px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 30px; }
-        .game-card { background: var(--card); border: 1px solid var(--accent); border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         #settingsPanel { position: fixed; top: 0; right: -400px; width: 380px; height: 100vh; background: rgba(0, 5, 0, 0.98); border-left: 2px solid var(--primary); z-index: 2000; transition: 0.4s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
         #settingsPanel.open { right: 0; }
         .input-box { background: #000; border: 1px solid var(--primary); color: var(--primary); padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; outline: none; }
+        .chaos-btn { cursor: pointer; font-weight: bold; border-radius: 4px; }
     </style>
 </head>
 <body id="bodyRoot">
 
-    <div id="scareOverlay">
-        <img id="scareImage" src="https://i.imgur.com/K3pWpXG.jpeg">
-    </div>
-
+    <img id="fakeCursor" src="https://cur.cursors-4u.net/arrows/arr-2/arr112.png" alt="cursor">
     <div id="hackerOverlay"></div>
     <div id="seizedOverlay">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Seal_of_the_Federal_Bureau_of_Investigation.svg/1200px-Seal_of_the_Federal_Bureau_of_Investigation.svg.png" width="200">
-        <h1 style="color:red; font-size: 40px; margin-top: 20px;">SITE SHUT DOWN</h1>
-        <p>This domain has been seized by the Federal Bureau of Investigation.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Seal_of_the_Federal_Bureau_of_Investigation.svg/1200px-Seal_of_the_Federal_Bureau_of_Investigation.svg.png" width="150">
+        <h1 style="color:red;">DOMAIN SEIZED</h1>
     </div>
 
-    <div id="lockdownScreen">
-        <h1 style="font-size: 50px;">404 Not Found</h1>
-        <p>The requested URL was not found on this server.</p>
-    </div>
+    <div id="lockdownScreen"><h1>404 Not Found</h1></div>
 
     <div id="mainApp">
         <div id="authLayer" style="position:fixed; inset:0; background:#000; z-index:5000; display:flex; align-items:center; justify-content:center;">
              <div style="width:320px; padding:40px; border:1px solid var(--primary); text-align:center;">
-                <h1 style="letter-spacing:5px;">MONGLE_OS</h1>
+                <h1>MONGLE_OS</h1>
                 <input type="text" id="username" class="input-box" placeholder="USERNAME">
-                <button class="input-box" onclick="handleLogin('pleb')">LOGIN</button>
-                <button class="input-box" style="font-size:10px;" onclick="promptLogin('root')">ROOT_CONSOLE</button>
+                <button class="input-box chaos-btn" onclick="handleLogin('pleb')">LOGIN</button>
+                <button class="input-box chaos-btn" style="font-size:10px;" onclick="promptLogin('root')">ROOT_CONSOLE</button>
             </div>
         </div>
 
         <div id="arcade" style="height:100%; display:none; flex-direction:column;">
             <div class="top-bar">
                 <div id="userTag">USER: GUEST</div>
-                <button id="settingsBtn" class="input-box" style="display:none; width:auto; margin:0;" onclick="toggleSettings()">⚙️</button>
+                <button id="settingsBtn" class="input-box chaos-btn" style="display:none; width:auto; margin:0;" onclick="toggleSettings()">⚙️</button>
             </div>
-            <div class="grid-container">
-                <div class="grid" id="gameGrid"></div>
-            </div>
+            <div style="flex-grow:1; display:flex; align-items:center; justify-content:center; opacity:0.1;">MONITORING_ACTIVE</div>
         </div>
 
         <div id="settingsPanel">
-            <h2 style="color:red;">CHAOS_CONSOLE</h2>
-            <button class="input-box" style="background: red; color: black; font-weight: bold;" onclick="triggerChaos('scare')">⚠️ TRIGGER JUMPSCARE</button>
-            <button class="input-box" onclick="triggerChaos('shake')">DRIVE_QUAKE</button>
-            <button class="input-box" onclick="triggerChaos('hacker')">HACKER_TYPER</button>
-            <button class="input-box" onclick="triggerChaos('seized')">FBI_SEIZURE</button>
-            <button class="input-box" style="color: var(--primary);" onclick="triggerChaos('reset')">STOP ALL CHAOS</button>
-            <button class="input-box" style="margin-top:20px;" onclick="toggleSettings()">CLOSE</button>
+            <h2 style="color:var(--primary); border-bottom:1px solid var(--primary);">ROOT_OVERRIDE</h2>
+            
+            <h3 style="color:cyan; font-size:12px;">📢 VOICE_OF_GOD (TTS)</h3>
+            <input type="text" id="ttsInput" class="input-box" placeholder="Message to speak...">
+            <button class="input-box chaos-btn" style="background:cyan; color:black;" onclick="deployTTS()">SPEAK TO ALL</button>
+
+            <h3 style="color:red; font-size:12px; margin-top:20px;">🔥 CHAOS_MODULES</h3>
+            <button class="input-box chaos-btn" style="background:#440044; color:white;" onclick="triggerChaos('ghost')">👻 POLTERGEIST</button>
+            <button class="input-box chaos-btn" onclick="triggerChaos('hacker')">💻 HACKER_TYPER</button>
+            <button class="input-box chaos-btn" onclick="triggerChaos('seized')">👮 FBI_SEIZURE</button>
+            
+            <button class="input-box chaos-btn" style="margin-top:20px; border-color:red; color:red;" onclick="triggerChaos('reset')">STOP ALL EFFECTS</button>
+            <button class="input-box chaos-btn" onclick="toggleSettings()">CLOSE</button>
         </div>
     </div>
 
@@ -89,7 +80,6 @@
         const db = getDatabase(app);
 
         let isRoot = false;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         window.handleLogin = (role) => {
             if (role === 'root') { isRoot = true; document.getElementById('settingsBtn').style.display = 'block'; }
@@ -98,47 +88,43 @@
             syncChaos();
         };
 
-        window.promptLogin = (role) => {
-            if (prompt("Master Key:") === "MONGLE_OWNER_99") handleLogin('root');
+        window.promptLogin = (role) => { if (prompt("Master Key:") === "MONGLE_OWNER_99") handleLogin('root'); };
+
+        // TTS DEPLOYMENT
+        window.deployTTS = () => {
+            const msg = document.getElementById('ttsInput').value;
+            if(msg) set(ref(db, 'global/tts'), { text: msg, time: Date.now() });
         };
 
         window.triggerChaos = (type) => set(ref(db, 'global/chaos'), {type: type, time: Date.now()});
 
         function syncChaos() {
+            // Listen for Voice
+            onValue(ref(db, 'global/tts'), (s) => {
+                const data = s.val();
+                if (data && !isRoot) {
+                    const utterance = new SpeechSynthesisUtterance(data.text);
+                    utterance.rate = 0.9; // Slightly slower for creepiness
+                    utterance.pitch = 0.1; // Deep "god-like" voice
+                    window.speechSynthesis.speak(utterance);
+                }
+            });
+
+            // Listen for Chaos
             onValue(ref(db, 'global/chaos'), (s) => {
                 const data = s.val();
                 if (!data) return;
                 const mode = data.type;
-                const body = document.getElementById('bodyRoot');
-                const hacker = document.getElementById('hackerOverlay');
-                const seized = document.getElementById('seizedOverlay');
-                const scare = document.getElementById('scareOverlay');
-
-                body.classList.remove('shake');
-                hacker.style.display = seized.style.display = scare.style.display = 'none';
-
-                if (mode === 'shake') body.classList.add('shake');
-                if (mode === 'hacker') hacker.style.display = 'block';
-                if (mode === 'seized') seized.style.display = 'flex';
-                if (mode === 'scare') {
-                    scare.style.display = 'flex';
-                    playScareSound();
-                    setTimeout(() => { scare.style.display = 'none'; }, 1200);
-                }
+                
+                document.body.classList.remove('ghost-active');
+                document.getElementById('fakeCursor').style.display = 'none';
+                document.getElementById('hackerOverlay').style.display = 'none';
+                document.getElementById('seizedOverlay').style.display = 'none';
+                
+                if (mode === 'ghost') { document.body.classList.add('ghost-active'); document.getElementById('fakeCursor').style.display = 'block'; }
+                if (mode === 'hacker') document.getElementById('hackerOverlay').style.display = 'block';
+                if (mode === 'seized') document.getElementById('seizedOverlay').style.display = 'flex';
             });
-        }
-
-        function playScareSound() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 1);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 1);
         }
 
         window.toggleSettings = () => document.getElementById('settingsPanel').classList.toggle('open');
