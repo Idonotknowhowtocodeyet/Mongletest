@@ -1,64 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Panel</title>
-    <style>
-        body { background: #020617; color: white; font-family: sans-serif; padding: 40px; }
-        .box { background: #0f172a; border: 1px solid #1e293b; padding: 25px; border-radius: 15px; max-width: 600px; margin: 20px auto; }
-        input { width: 90%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #3b82f6; color: white; border-radius: 8px; }
-        .btn { width: 95%; padding: 12px; background: #3b82f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .danger { background: #ef4444 !important; }
-    </style>
-</head>
-<body>
-    <div id="adminContent" style="display:none;">
-        <h1 style="text-align:center; color:#3b82f6;">⚙️ MASTER SETTINGS</h1>
-        
-        <div class="box">
-            <h3>🛡️ Panic Redirect</h3>
-            <p>Current: <span id="curPanic" style="color:#4ade80"></span></p>
-            <input type="text" id="panicInput" placeholder="Enter full URL (e.g. https://google.com)">
-            <button class="btn" onclick="savePanic()">Update Panic Site</button>
-        </div>
+<div class="box">
+    <h3>Maintenance & Power</h3>
+    <input type="text" id="bgUrl" placeholder="New Background Image URL...">
+    <button onclick="update('globalBG', 'bgUrl')">Set Global Background</button>
+    
+    <input type="text" id="emo" placeholder="New Global Emoji (🔥)">
+    <button onclick="update('globalEmoji', 'emo')">Set Global Icons</button>
 
-        <div class="box">
-            <h3>🌍 Force Icon</h3>
-            <input type="text" id="emojiInput" placeholder="Enter Emoji (e.g. 🔥)">
-            <button class="btn" onclick="saveEmoji()">Set Global Icon</button>
-        </div>
+    <button style="background:red" onclick="localStorage.clear(); sessionStorage.clear(); location.reload();">MASTER WIPE</button>
+</div>
 
-        <div class="box">
-            <h3>⚠️ System Reset</h3>
-            <p>Clears all local storage (Saves, Favorites, Backgrounds).</p>
-            <button class="btn danger" onclick="localStorage.clear(); location.reload();">FACTORY RESET SITE</button>
-        </div>
-        
-        <p style="text-align:center;"><a href="index.html" style="color:#3b82f6; text-decoration:none; font-weight:bold;">← BACK TO GAMES</a></p>
-    </div>
-
-    <script>
-        const mode = new URLSearchParams(window.location.search).get('mode');
-        if(mode === 'admin') {
-            const pw = prompt("Enter Admin Password:");
-            if(pw === "1234") {
-                document.getElementById('adminContent').style.display = 'block';
-                document.getElementById('curPanic').innerText = localStorage.getItem('panicURL') || 'https://classroom.google.com';
-            } else {
-                window.location.href = "index.html";
-            }
+<script>
+    function update(key, inputId) {
+        const val = document.getElementById(inputId).value;
+        if(val) {
+            localStorage.setItem(key, val);
+            alert("Update Sent! Games in progress will refresh after they close.");
         }
-
-        function savePanic() {
-            localStorage.setItem('panicURL', document.getElementById('panicInput').value);
-            alert("Panic Redirect Updated!");
-            location.reload();
-        }
-
-        function saveEmoji() {
-            localStorage.setItem('globalEmoji', document.getElementById('emojiInput').value);
-            alert("Icon Updated!");
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
