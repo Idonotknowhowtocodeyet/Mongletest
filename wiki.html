@@ -3,31 +3,35 @@
 <head>
     <title>Settings</title>
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
-        .box { background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 20px; max-width: 500px; margin-inline: auto; }
-        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .danger { background: #ef4444; }
+        body { background: #020617; color: white; font-family: sans-serif; padding: 40px; }
+        .box { background: #0f172a; border: 1px solid #1e293b; padding: 25px; border-radius: 15px; max-width: 500px; margin: auto; margin-bottom: 20px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; color: white; border: 1px solid #3b82f6; border-radius: 5px; }
+        .btn { padding: 12px; background: #3b82f6; border: none; color: white; width: 100%; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
+    <h1 style="text-align:center;">SETTINGS</h1>
+
     <div class="box">
-        <h3>Viewer Settings</h3>
-        <p>Background Image URL:</p>
-        <input type="text" id="bgIn" style="width:90%; padding:8px;" placeholder="Paste URL here...">
-        <button class="btn" onclick="localStorage.setItem('globalBG', document.getElementById('bgIn').value); alert('Done!')">Apply Background</button>
+        <h3>User Customization</h3>
+        <p>Background Image URL (or hex code):</p>
+        <input type="text" id="bgIn" placeholder="Paste URL here...">
+        <button class="btn" onclick="localStorage.setItem('mBG', document.getElementById('bgIn').value); alert('Background Saved!')">Apply</button>
     </div>
 
     <div id="adminPanel" class="box" style="display:none; border: 2px solid #ef4444;">
-        <h3 style="color:#ef4444">Admin Tools</h3>
-        <button class="btn" onclick="localStorage.removeItem('mFavs'); alert('Favs cleared')">Reset Favorites</button>
-        <button class="btn danger" onclick="localStorage.clear(); sessionStorage.clear(); location.href='index.html'">FULL FACTORY RESET</button>
+        <h3 style="color:#ef4444">🛡️ Admin Control</h3>
+        <p>Change Global Icon:</p>
+        <input type="text" id="emoIn" placeholder="Enter Emoji (🔥)">
+        <button class="btn" onclick="localStorage.setItem('mEmoji', document.getElementById('emoIn').value); alert('Icon Saved!')">Change All Icons</button>
+        <button class="btn" style="background:#ef4444; margin-top:20px;" onclick="localStorage.clear(); location.href='index.html'">FULL FACTORY RESET</button>
     </div>
 
-    <p style="text-align:center;"><a href="index.html" style="color:#3b82f6">← Back</a></p>
+    <p style="text-align:center;"><a href="index.html" style="color:#3b82f6">← Return to Home</a></p>
 
     <script>
-        // Check for Admin
-        if(sessionStorage.getItem('auth') === 'mongle') {
+        // Only show admin tools if logged in as Mongle
+        if(sessionStorage.getItem('mAuth') === 'mongle') {
             document.getElementById('adminPanel').style.display = 'block';
         }
     </script>
