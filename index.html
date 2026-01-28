@@ -8,104 +8,96 @@
         :root { --primary: #00ff41; --bg: #000; --card: #0a0a0a; --accent: #003b00; --panic: #ff3131; --mod: #007bff; --neon: 0 0 10px var(--primary); }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Consolas', monospace; overflow: hidden; }
         
+        #versionTag { position: fixed; bottom: 5px; left: 15px; font-size: 9px; color: var(--accent); z-index: 60000; opacity: 0.5; }
+        
         /* 404 CLOAK */
         #lockdownScreen { position: fixed; inset: 0; background: #fff; z-index: 1000000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #000; font-family: 'Segoe UI', sans-serif; }
         
-        /* BROADCAST BANNER */
-        #globalBanner { position: fixed; top: 0; left: 0; width: 100%; background: var(--panic); color: white; padding: 5px; text-align: center; font-size: 12px; z-index: 500000; display: none; font-weight: bold; border-bottom: 2px solid white; }
-
-        /* INTERNAL GAME VIEWER */
-        #gameViewer { position: fixed; inset: 0; background: #000; z-index: 400000; display: none; flex-direction: column; }
-        #gameIframe { border: none; width: 100%; flex-grow: 1; }
-        .viewer-bar { background: #050505; padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--accent); }
-
         /* UI LAYOUT */
-        #mainApp { display: none; height: 100vh; flex-direction: column; padding-top: 30px; }
+        #mainApp { display: none; height: 100vh; flex-direction: column; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--accent); background: #050505; }
+        .live-tag { font-size: 10px; background: #111; padding: 2px 10px; border-radius: 12px; border: 1px solid var(--accent); color: var(--primary); }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 25px; overflow-y: auto; flex-grow: 1; }
         .game-card { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.2s; }
         .game-card:hover { border-color: var(--primary); transform: scale(1.02); box-shadow: var(--neon); }
 
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #080808; border: 1px solid var(--primary); padding: 20px; z-index: 600000; width: 400px; border-radius: 8px; }
+        /* MODALS & INPUTS */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #080808; border: 1px solid var(--primary); padding: 20px; z-index: 150000; width: 400px; border-radius: 8px; box-shadow: 0 0 30px rgba(0,255,65,0.1); }
         .input-box { background: #000; border: 1px solid var(--accent); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 8px; border-radius: 4px; text-align: center; font-family: inherit; }
         .btn-glow { background: var(--primary); color: #000; font-weight: bold; border: none; cursor: pointer; padding: 10px; border-radius: 4px; width: 100%; transition: 0.2s; }
-        
+        .btn-glow:hover { filter: brightness(1.2); }
+
         .log-container { background: #000; border: 1px solid #111; height: 150px; overflow-y: auto; font-size: 11px; margin-bottom: 10px; }
         .log-entry { padding: 8px; border-bottom: 1px solid #0a0a0a; cursor: pointer; display: flex; justify-content: space-between; }
         
-        #whisperOverlay { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: #000; border: 2px solid var(--primary); padding: 20px; z-index: 700000; display: none; text-align: center; box-shadow: var(--neon); min-width: 300px; }
+        .dossier { display: none; position: fixed; right: 20px; top: 70px; width: 280px; background: #050505; border: 1px solid red; padding: 15px; z-index: 160000; font-size: 11px; }
     </style>
 </head>
 <body>
 
-    <div id="globalBanner">SYSTEM_NOTICE: <span id="bannerText"></span></div>
-
-    <div id="whisperOverlay">
-        <div style="font-size: 10px; color: red; margin-bottom: 10px;">INCOMING_ENCRYPTED_DATA</div>
-        <div id="whisperText" style="font-size: 16px; color: white;"></div>
-        <button class="btn-glow" style="margin-top: 15px; background: #111; color: white;" onclick="this.parentElement.style.display='none'">DISMISS</button>
-    </div>
-
-    <div id="gameViewer">
-        <div class="viewer-bar">
-            <span id="currentGameTitle" style="color:white; font-weight:bold;">LOADING...</span>
-            <button class="btn-glow" style="width:auto; padding:0 20px; background:red; color:white;" onclick="closeGame()">EXIT_GAME</button>
-        </div>
-        <iframe id="gameIframe" src=""></iframe>
-    </div>
-
     <div id="lockdownScreen">
-        <h1 style="font-size: 80px; margin: 0;">404</h1>
+        <h1 style="font-size: 100px; margin: 0;">404</h1>
         <p>The requested URL was not found on this server.</p>
     </div>
+
+    <div id="versionTag">MONGLE_OS v5.0.0 | <span id="roleTag">UNAUTHORIZED</span></div>
 
     <div id="mainApp">
         <div class="top-bar">
             <div style="display:flex; align-items:center; gap:20px;">
                 <div style="font-weight:900; letter-spacing:3px; font-size: 18px; color:white;">MONGLE_<span style="color:var(--primary)">OS</span></div>
-                <input type="text" id="searchBar" class="input-box" style="width: 200px; margin: 0; padding: 5px;" placeholder="SEARCH GAMES/USERS..." onkeyup="masterSearch()">
+                <input type="text" id="searchBar" class="input-box" style="width: 200px; margin: 0; padding: 5px;" placeholder="SEARCH GAMES..." onkeyup="filterGames()">
+                <div class="live-tag">PEERS: <span id="userCount">0</span></div>
             </div>
             <div style="display:flex; gap:8px;">
                 <button class="input-box" style="width:auto; margin:0; padding: 5px 15px;" onclick="toggleModal('settingsModal')">SETTINGS</button>
-                <button id="staffBtn" class="input-box" style="display:none; width:auto; margin:0; border-color:var(--mod); color:var(--mod);" onclick="toggleModal('staffConsole')">ROOT</button>
+                <button id="staffBtn" class="input-box" style="display:none; width:auto; margin:0; border-color:var(--mod); color:var(--mod);" onclick="toggleModal('staffConsole')">ADMIN</button>
                 <button class="input-box" style="background:var(--panic); color:white; border:none; width:auto;" onclick="triggerPanic()">PANIC</button>
             </div>
         </div>
         <div class="grid" id="gameGrid"></div>
     </div>
 
-    <div id="staffConsole" class="modal">
-        <h3 style="color:var(--mod); margin-top:0;">OVERLORD_PANEL</h3>
-        <div id="userLogs" class="log-container"></div>
-        
-        <p style="font-size:9px; color:#555;">GLOBAL BROADCAST PIN</p>
-        <input type="text" id="broadcastInp" class="input-box" placeholder="Message for all users...">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;">
-            <button class="btn-glow" onclick="sendBroadcast()">PIN MESSAGE</button>
-            <button class="btn-glow" style="background:#222; color:white;" onclick="clearBroadcast()">CLEAR PIN</button>
-        </div>
+    <div id="settingsModal" class="modal">
+        <h3 style="text-align:center; margin-top:0;">SYSTEM_PREFERENCES</h3>
+        <p style="font-size:10px;">PANIC_URL:</p>
+        <input type="text" id="panicUrlInput" class="input-box" placeholder="https://google.com">
+        <p style="font-size:10px;">PANIC_KEY: <span id="currentKeyDisplay" style="color:var(--primary)">]</span></p>
+        <button class="btn-glow" id="keyBindBtn" onclick="startKeyBind()" style="background:#222; color:white;">REBIND KEY</button>
+        <button class="btn-glow" onclick="saveSettings()" style="margin-top:15px;">SAVE CONFIG</button>
+        <button class="input-box" onclick="toggleModal('settingsModal')" style="margin-top:5px; border:none;">CLOSE</button>
+    </div>
 
+    <div id="staffConsole" class="modal">
+        <h3 style="color:var(--mod); margin-top:0;">ROOT_TERMINAL</h3>
+        <div id="userLogs" class="log-container"></div>
         <div id="rootActions" style="display:none;">
-            <button class="btn-glow" style="background:#ff8c00;" onclick="remove(ref(db, 'system/logs'))">PURGE ALL SESSIONS</button>
+            <button class="btn-glow" style="margin-bottom:5px;" onclick="sendCommand('reload')">FORCE_RELOAD_ALL</button>
+            <button class="btn-glow" style="background:#ff8c00;" onclick="clearLogs()">WIPE_ALL_SESSIONS</button>
         </div>
         <button class="input-box" onclick="toggleModal('staffConsole')" style="margin-top:10px;">EXIT</button>
     </div>
 
-    <div id="settingsModal" class="modal">
-        <h3>SYSTEM_SETTINGS</h3>
-        <input type="text" id="panicUrlInput" class="input-box" placeholder="Panic URL (https://...)">
-        <button class="btn-glow" onclick="saveSettings()">SAVE CONFIG</button>
-        <button class="input-box" onclick="toggleModal('settingsModal')" style="margin-top:5px; border:none;">CLOSE</button>
+    <div id="userDossier" class="dossier">
+        <h4 style="margin:0 0 10px 0; color:red; border-bottom:1px solid #300;">TRACE_INFO</h4>
+        <p><b>USER:</b> <span id="dos-id">---</span></p>
+        <p><b>STATUS:</b> <span id="dos-game">---</span></p>
+        <p><b>IP:</b> <span id="dos-ip">---</span></p>
+        <input type="text" id="whisperInp" class="input-box" placeholder="Whisper msg..." style="margin-top:10px;">
+        <button class="btn-glow" style="background:var(--mod); color:white;" onclick="sendWhisper()">WHISPER</button>
+        <button class="btn-glow" style="background:red; color:white; margin-top:5px;" onclick="remoteKill()">TERMINATE</button>
+        <button class="input-box" onclick="document.getElementById('userDossier').style.display='none'" style="margin-top:10px;">CLOSE</button>
     </div>
 
     <div id="authLayer" style="display:none; position:fixed; inset:0; background:#000; z-index:900000; align-items:center; justify-content:center; flex-direction:column;">
-        <h1 style="letter-spacing:10px;">MONGLE_OS</h1>
-        <div style="width:280px; text-align:center; background:#050505; padding:30px; border:1px solid #111;">
+        <h1 style="letter-spacing:10px; margin-bottom:20px;">MONGLE_OS</h1>
+        <div style="width:300px; text-align:center; background:#050505; padding:30px; border:1px solid #111;">
             <input type="text" id="username" class="input-box" placeholder="USERNAME" maxlength="15">
-            <button class="btn-glow" onclick="handleLogin('GUEST')">ENTER</button>
-            <button class="input-box" style="margin-top:15px; font-size:10px;" onclick="handleAuthPrompt()">ROOT_ACCESS</button>
+            <button class="btn-glow" onclick="handleLogin('GUEST')">INITIATE</button>
+            <div style="margin-top:20px; border-top:1px solid #111; padding-top:10px;">
+                <button class="input-box" style="color:#444; border-color:#111;" onclick="handleAuthPrompt()">ADMIN_ROOT</button>
+            </div>
         </div>
     </div>
 
@@ -117,16 +109,24 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let userRole = "GUEST", isGhost = false, currentUserName = "", userRef = null, panicUrl = localStorage.getItem("panicUrl") || "https://google.com";
+        let userRole = "GUEST", isGhost = false, currentUserName = "", userRef = null, selectedUserKey = null, userIp = "0.0.0.0";
+        let panicUrl = localStorage.getItem("panicUrl") || "https://google.com";
+        let panicKey = localStorage.getItem("panicKey") || "]";
 
+        document.getElementById('panicUrlInput').value = panicUrl;
+        document.getElementById('currentKeyDisplay').innerText = panicKey;
+
+        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => userIp = d.ip);
+
+        // LOGIN & AUTH
         window.handleAuthPrompt = () => {
-            const id = prompt("KEY:");
+            const id = prompt("ROOT_KEY:");
             if(id === "MONGLE_OWNER_99") { userRole = "ROOT"; isGhost = true; setupSession(); }
             else if(id === "MONGLE_MOD_2026") { userRole = "ADMIN"; isGhost = false; setupSession(); }
         };
 
         window.handleLogin = (role) => {
-            if(!document.getElementById('username').value) return alert("Identify yourself.");
+            if(!document.getElementById('username').value) return alert("Missing ID");
             userRole = role; setupSession();
         };
 
@@ -134,9 +134,10 @@
             currentUserName = document.getElementById('username').value;
             document.getElementById('authLayer').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('roleTag').innerText = userRole + (isGhost ? " (GHOST)" : "");
             
             if(!isGhost) {
-                userRef = push(ref(db, 'system/logs'), { user: currentUserName, role: userRole, status: "Idle", time: Date.now() });
+                userRef = push(ref(db, 'system/logs'), { user: currentUserName, role: userRole, ip: userIp, status: "Idle" });
                 onDisconnect(userRef).remove();
             }
 
@@ -145,76 +146,59 @@
                 if(userRole === "ROOT") document.getElementById('rootActions').style.display = 'block';
             }
             loadGames();
-            syncSystem();
         }
 
-        function syncSystem() {
-            // Listen for Global Pin
-            onValue(ref(db, 'system/broadcast'), (s) => {
-                const d = s.val();
-                if(d && d.active) {
-                    document.getElementById('bannerText').innerText = d.msg;
-                    document.getElementById('globalBanner').style.display = 'block';
-                } else {
-                    document.getElementById('globalBanner').style.display = 'none';
-                }
+        // SYNC & LOGS
+        onValue(ref(db, 'system/logs'), (s) => {
+            const data = s.val() || {};
+            document.getElementById('userCount').innerText = Object.keys(data).length;
+            const logBox = document.getElementById('userLogs'); logBox.innerHTML = "";
+            Object.entries(data).forEach(([key, l]) => {
+                const div = document.createElement('div');
+                div.className = "log-entry";
+                div.innerHTML = `<span>[${l.role}] ${l.user}</span> <span style="font-size:9px; color:#444;">${l.status}</span>`;
+                div.onclick = () => {
+                    selectedUserKey = key;
+                    document.getElementById('dos-id').innerText = l.user;
+                    document.getElementById('dos-game').innerText = l.status;
+                    document.getElementById('dos-ip').innerText = l.ip;
+                    document.getElementById('userDossier').style.display = 'block';
+                };
+                logBox.appendChild(div);
             });
+        });
 
-            // Listen for Whispers
-            onValue(ref(db, `system/whispers/${currentUserName}`), (s) => {
-                const d = s.val();
-                if(d) {
-                    document.getElementById('whisperText').innerText = d.msg;
-                    document.getElementById('whisperOverlay').style.display = 'block';
-                    remove(ref(db, `system/whispers/${currentUserName}`));
-                }
-            });
-
-            // Listen for Admin Logs
-            onValue(ref(db, 'system/logs'), (s) => {
-                const data = s.val() || {};
-                const logBox = document.getElementById('userLogs'); logBox.innerHTML = "";
-                Object.entries(data).forEach(([key, l]) => {
-                    const div = document.createElement('div');
-                    div.className = "log-entry";
-                    div.innerHTML = `<span>[${l.role}] ${l.user}</span> <span style="font-size:9px; color:#555;">${l.status}</span>`;
-                    div.onclick = () => {
-                        const msg = prompt(`Whisper to ${l.user}:`);
-                        if(msg) set(ref(db, `system/whispers/${l.user}`), { msg });
-                    };
-                    logBox.appendChild(div);
-                });
-            });
-        }
-
-        window.openGame = (name, file) => {
-            const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${file}`;
-            document.getElementById('currentGameTitle').innerText = name.toUpperCase();
-            document.getElementById('gameIframe').src = url;
-            document.getElementById('gameViewer').style.display = 'flex';
-            if(userRef) set(ref(db, `system/logs/${userRef.key}/status`), "Playing: " + name);
+        // SETTINGS & PANIC
+        window.startKeyBind = () => {
+            const btn = document.getElementById('keyBindBtn');
+            btn.innerText = "LISTENING...";
+            const listener = (e) => {
+                panicKey = e.key;
+                document.getElementById('currentKeyDisplay').innerText = panicKey;
+                btn.innerText = "REBIND KEY";
+                window.removeEventListener('keydown', listener);
+            };
+            window.addEventListener('keydown', listener);
         };
 
-        window.closeGame = () => {
-            document.getElementById('gameViewer').style.display = 'none';
-            document.getElementById('gameIframe').src = "";
-            if(userRef) set(ref(db, `system/logs/${userRef.key}/status`), "Idle");
+        window.saveSettings = () => {
+            panicUrl = document.getElementById('panicUrlInput').value;
+            localStorage.setItem("panicUrl", panicUrl);
+            localStorage.setItem("panicKey", panicKey);
+            toggleModal('settingsModal');
         };
 
-        window.masterSearch = () => {
+        window.triggerPanic = () => window.location.replace(panicUrl);
+
+        // SEARCH
+        window.filterGames = () => {
             const q = document.getElementById('searchBar').value.toLowerCase();
-            // Filter Games
-            document.querySelectorAll('.game-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(q) ? 'block' : 'none');
-            // Filter Users in Log
-            document.querySelectorAll('.log-entry').forEach(e => e.style.display = e.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
+            document.querySelectorAll('.game-card').forEach(c => {
+                c.style.display = c.innerText.toLowerCase().includes(q) ? 'block' : 'none';
+            });
         };
 
-        window.sendBroadcast = () => {
-            const msg = document.getElementById('broadcastInp').value;
-            if(msg) set(ref(db, 'system/broadcast'), { active: true, msg });
-        };
-        window.clearBroadcast = () => set(ref(db, 'system/broadcast'), { active: false });
-
+        // GAMES
         async function loadGames() {
             const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
             const data = await res.json();
@@ -222,20 +206,25 @@
             data.filter(f => f.name.endsWith('.html') && f.name !== 'index.html').forEach(f => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                const cleanName = f.name.replace('.html','').replace(/[-_]/g, ' ');
-                card.innerText = cleanName;
-                card.onclick = () => openGame(cleanName, f.name);
+                card.innerText = f.name.replace('.html','').replace(/[-_]/g, ' ');
+                card.onclick = () => {
+                    if(userRef) set(ref(db, `system/logs/${userRef.key}/status`), "Playing: " + f.name.replace('.html',''));
+                    window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${f.name}`, '_blank');
+                };
                 grid.appendChild(card);
             });
         }
 
-        window.saveSettings = () => { localStorage.setItem("panicUrl", document.getElementById('panicUrlInput').value); toggleModal('settingsModal'); };
-        window.triggerPanic = () => window.location.replace(localStorage.getItem("panicUrl") || "https://google.com");
+        // HELPERS
         window.toggleModal = (id) => { const e = document.getElementById(id); e.style.display = (e.style.display === 'block') ? 'none' : 'block'; };
+        window.sendCommand = (t) => set(ref(db, `system/commands/${t}`), Date.now());
+        window.clearLogs = () => remove(ref(db, 'system/logs'));
+
+        onValue(ref(db, 'system/commands/reload'), (s) => { if(s.val() && !isGhost) window.location.reload(); });
 
         document.addEventListener('keydown', (e) => { 
             if(e.shiftKey && e.key === 'L') { document.getElementById('lockdownScreen').style.display = 'none'; document.getElementById('authLayer').style.display = 'flex'; }
-            if(e.key === ']') triggerPanic();
+            if(e.key === panicKey) triggerPanic();
         });
     </script>
 </body>
