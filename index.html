@@ -7,50 +7,41 @@
     <style>
         :root { --primary: #00ff41; --bg: #000; --card: #0a0a0a; --accent: #003b00; --panic: #ff3131; --pin: #ffcc00; }
         
-        /* CONVINCING 404 SCREEN */
-        #lockdownScreen { 
-            position: fixed; inset: 0; background: #fff; z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #000; font-family: "Segoe UI", Tahoma, sans-serif; text-align: left;
-        }
+        /* 404 SCREEN */
+        #lockdownScreen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #000; font-family: "Segoe UI", Tahoma, sans-serif; }
         .error-container { max-width: 600px; padding: 20px; }
-        .error-code { font-size: 72px; font-weight: bold; margin: 0; color: #555; transition: 0.2s; cursor: default; user-select: none; }
+        .error-code { font-size: 72px; font-weight: bold; margin: 0; color: #555; cursor: default; user-select: none; }
         .error-msg { font-size: 24px; margin: 10px 0; }
         .error-sub { color: #666; font-size: 14px; margin-bottom: 20px; }
-        .back-btn { background: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; cursor: pointer; font-weight: 500; }
-        .glitch-text { color: #ff3131 !important; font-family: 'Courier New', monospace !important; font-size: 14px !important; margin: 5px 0; }
+        .back-btn { background: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; cursor: pointer; }
 
-        /* MAIN APP STYLES */
+        /* MAIN APP */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Courier New', monospace; overflow: hidden; }
         #mainApp { display: none; height: 100vh; flex-direction: column; }
         
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: #000; border-bottom: 1px solid var(--accent); height: 65px; box-sizing: border-box; }
-        .status-hub { display: flex; gap: 10px; font-size: 9px; }
-        .indicator { display: flex; align-items: center; gap: 4px; color: #444; }
-        .indicator.active { color: var(--primary); }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-        .search-container { flex-grow: 1; max-width: 350px; margin: 0 20px; }
+        .brand { font-weight: bold; letter-spacing: 2px; color: var(--primary); font-size: 18px; }
+        
+        .search-container { flex-grow: 1; max-width: 300px; margin: 0 20px; }
         #gameSearch { width: 100%; background: #050505; border: 1px solid var(--accent); color: var(--primary); padding: 8px; font-family: inherit; outline: none; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 20px; overflow-y: auto; height: calc(100vh - 65px); }
-        .game-card { background: var(--card); border: 1px solid var(--accent); padding: 15px; border-radius: 4px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 12px; display: flex; align-items: center; justify-content: center; min-height: 60px; }
-        .game-card:hover { border-color: var(--primary); background: #001a00; transform: scale(1.02); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 20px; overflow-y: auto; height: calc(100vh - 65px); }
+        .game-card { background: var(--card); border: 1px solid var(--accent); padding: 15px; border-radius: 4px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 13px; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        .game-card:hover { border-color: var(--primary); background: #001a00; transform: translateY(-2px); }
 
-        /* AUTH & UPDATES FEED */
-        #authLayer { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .auth-container { display: flex; gap: 20px; align-items: stretch; max-width: 700px; }
-        .login-box { width: 300px; padding: 40px; border: 1px solid var(--accent); text-align: center; background: #000; }
-        
-        .updates-panel { width: 300px; background: rgba(0, 15, 0, 0.5); border: 1px solid var(--accent); padding: 20px; text-align: left; font-size: 11px; overflow-y: auto; max-height: 350px; }
-        .update-item { margin-bottom: 12px; border-left: 2px solid var(--primary); padding-left: 10px; }
-        .update-date { color: var(--pin); font-weight: bold; }
+        /* LOGIN & UPDATES */
+        #authLayer { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; overflow-y: auto; }
+        .auth-container { display: flex; gap: 20px; max-width: 900px; padding: 20px; flex-wrap: wrap; justify-content: center; }
+        .login-box { width: 320px; padding: 40px; border: 1px solid var(--accent); text-align: center; background: #000; }
+        .updates-panel { width: 320px; background: rgba(0, 20, 0, 0.2); border: 1px solid var(--accent); padding: 25px; font-size: 11px; text-align: left; }
         
         /* MODALS */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0a0a0a; border: 1px solid var(--primary); padding: 25px; z-index: 11000; width: 320px; box-shadow: 0 0 30px #000; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0a0a0a; border: 1px solid var(--primary); padding: 25px; z-index: 11000; width: 350px; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 30px #000; }
         .input-box { background: #000; border: 1px solid var(--accent); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
         
         .version-tag { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: #111; pointer-events: none; }
+        .root-link { background: none; border: none; color: #1a1a1a; font-size: 10px; cursor: pointer; margin-top: 15px; transition: 0.3s; }
+        .root-link:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -58,10 +49,8 @@
     <div id="lockdownScreen">
         <div class="error-container">
             <p class="error-code" id="errorTrigger">404.</p>
-            <div id="errorMainText">
-                <p class="error-msg">The requested URL was not found on this server.</p>
-                <p class="error-sub">That’s all we know. <br><br>Technical details: <code>ERR_CONNECTION_REFUSED_BY_HOST</code></p>
-            </div>
+            <p class="error-msg">The requested URL was not found on this server.</p>
+            <p class="error-sub">Technical details: <code>ERR_CONNECTION_REFUSED</code></p>
             <button class="back-btn" onclick="location.reload()">Go back</button>
         </div>
     </div>
@@ -69,29 +58,27 @@
     <div id="authLayer" style="display:none;">
         <div class="auth-container">
             <div class="login-box">
-                <h2 style="letter-spacing:5px; color:var(--primary); margin-top:0;">MONGLE_OS</h2>
+                <h2 style="color:var(--primary); margin-top:0; letter-spacing: 5px;">MONGLE_OS</h2>
                 <input type="text" id="username" class="input-box" placeholder="USERNAME">
                 <button class="input-box" onclick="handleLogin('pleb')" style="border-color:var(--primary); cursor:pointer;">ENTER ARCADE</button>
-                <button onclick="promptRoot()" style="background:none; border:none; color:#111; font-size:10px; cursor:pointer;">[ROOT_CONSOLE]</button>
+                <hr border="1" color="#111" style="margin: 20px 0;">
+                <p style="font-size: 10px; color: #444;">REQUEST A GAME:</p>
+                <input type="text" id="gameReqInput" class="input-box" placeholder="Game Name...">
+                <button class="input-box" onclick="submitRequest()" style="font-size: 10px;">SUBMIT REQUEST</button>
+                <button class="root-link" onclick="promptRoot()">[ROOT_CONSOLE]</button>
             </div>
             <div class="updates-panel">
                 <h3 style="margin-top:0; color:var(--primary);">SYSTEM_LOG</h3>
-                <div id="updatesContainer"><div style="color:#333;">Fetching logs...</div></div>
+                <div id="updatesContainer"></div>
             </div>
         </div>
     </div>
 
     <div id="mainApp">
         <div class="top-bar">
-            <div id="userTag" style="color:var(--pin); font-size: 12px; min-width:100px;">GUEST</div>
-            <div class="status-hub">
-                <div id="dbStatus" class="indicator"><div class="dot"></div> DB</div>
-                <div id="ghStatus" class="indicator"><div class="dot"></div> GH</div>
-            </div>
-            <div class="search-container">
-                <input type="text" id="gameSearch" placeholder="SEARCH_DATABASE..." onkeyup="filterGames()">
-            </div>
+            <div class="brand">MONGLE ARCADE</div>
             <div style="display:flex; gap:8px;">
+                <input type="text" id="gameSearch" class="input-box" style="width:200px; margin:0;" placeholder="FIND GAME..." onkeyup="filterGames()">
                 <button class="input-box" style="width:auto; margin:0; padding:5px 10px;" onclick="toggleModal('plebSettings')">🔧</button>
                 <button id="adminBtn" class="input-box" style="display:none; width:auto; margin:0; padding:5px 10px; border-color:red;" onclick="toggleModal('adminSettings')">⚙️</button>
                 <button class="input-box" style="background:var(--panic); color:white; width:auto; margin:0; border:none;" onclick="triggerPanic()">PANIC</button>
@@ -100,135 +87,111 @@
         <div class="grid" id="gameGrid"></div>
     </div>
 
-    <div id="adminSettings" class="modal">
-        <h3 style="color:red; margin-top:0;">ROOT_CONSOLE</h3>
-        <div style="background:#1a0000; padding:10px; border:1px solid red; margin-bottom:15px;">
-            <p style="font-size:10px; margin:0 0 5px 0; color:white;">MAINTENANCE_MODE:</p>
-            <button id="maintBtn" class="input-box" onclick="toggleMaintenance()" style="background:red; color:white; font-weight:bold; margin:0; cursor:pointer;">ACTIVATE LOCK</button>
-        </div>
-        <input type="text" id="updateInp" class="input-box" placeholder="Write new update...">
-        <button class="input-box" onclick="postUpdate()" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;">POST UPDATE</button>
-        <button class="input-box" onclick="toggleModal('adminSettings')" style="cursor:pointer;">CLOSE</button>
-    </div>
-
     <div id="plebSettings" class="modal">
         <h3 style="margin-top:0;">USER_SETTINGS</h3>
-        <p style="font-size:11px;">Panic URL:</p>
-        <input type="text" id="panicUrlInput" class="input-box" value="https://classroom.google.com">
-        <button class="input-box" onclick="toggleModal('plebSettings')">CLOSE</button>
+        <p style="font-size:11px;">Panic Redirect URL:</p>
+        <input type="text" id="panicUrlInput" class="input-box">
+        <button class="input-box" onclick="savePlebSettings()" style="border-color:var(--primary);">SAVE & CLOSE</button>
     </div>
 
-    <div class="version-tag">MONGLE_OS_V3.5.2</div>
+    <div id="adminSettings" class="modal">
+        <h3 style="color:red; margin-top:0;">ROOT_CONSOLE</h3>
+        <button id="maintBtn" class="input-box" onclick="toggleMaintenance()" style="background:red; color:white; font-weight:bold;">ACTIVATE LOCK</button>
+        <hr border="1" color="#222">
+        <input type="text" id="updateInp" class="input-box" placeholder="System Update text...">
+        <button class="input-box" onclick="postUpdate()">POST UPDATE</button>
+        <button class="input-box" onclick="wipeLogs()" style="color:#666; font-size:10px;">Wipe Logs</button>
+        <hr border="1" color="#222">
+        <p style="font-size:12px; color:var(--pin);">GAME REQUESTS:</p>
+        <div id="requestList" style="font-size:10px; color:#aaa; max-height:100px; overflow-y:auto; margin-bottom:10px;"></div>
+        <button class="input-box" onclick="clearRequests()" style="font-size:10px; background:#222;">CLEAR ALL REQUESTS</button>
+        <button class="input-box" onclick="toggleModal('adminSettings')" style="margin-top:10px;">CLOSE</button>
+    </div>
+
+    <div class="version-tag">MONGLE_OS_V3.6.0</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         let masterGames = [];
-        let clickCount = 0;
         let isMaintenance = false;
 
-        // MAINTENANCE LISTENER
-        onValue(ref(db, 'system/maintenance'), (snap) => {
-            isMaintenance = snap.val() || false;
-            const btn = document.getElementById('maintBtn');
-            btn.innerText = isMaintenance ? "DEACTIVATE LOCK" : "ACTIVATE LOCK";
-            btn.style.background = isMaintenance ? "var(--primary)" : "red";
-            btn.style.color = isMaintenance ? "black" : "white";
-
-            if (isMaintenance && document.getElementById('adminBtn').style.display !== 'block') {
-                document.getElementById('mainApp').style.display = 'none';
-                document.getElementById('authLayer').style.display = 'none';
-                document.getElementById('lockdownScreen').style.display = 'flex';
-            }
-        });
-
-        window.toggleMaintenance = () => set(ref(db, 'system/maintenance'), !isMaintenance);
-
-        // 404 SECRET
-        document.getElementById('errorTrigger').addEventListener('click', () => {
-            clickCount++;
-            if (clickCount === 5) {
-                const trigger = document.getElementById('errorTrigger');
-                const errorBox = document.getElementById('errorMainText');
-                trigger.innerText = "ACCESS_DENIED";
-                trigger.style.color = "red";
-                errorBox.innerHTML = `<p class="glitch-text">>> SECURITY_PROTOCOL_ACTIVE</p><p class="glitch-text">>> MONGLE_OS IS WATCHING.</p><p class="glitch-text" style="color:black !important; margin-top:20px;">(Shift+L to bypass.)</p>`;
-            }
-        });
+        document.getElementById('panicUrlInput').value = localStorage.getItem('monglePanicUrl') || "https://classroom.google.com";
 
         // BYPASS
         document.addEventListener('keydown', (e) => {
             if (e.shiftKey && e.key === 'L') {
-                if (isMaintenance) {
-                    if(prompt("MAINTENANCE ACTIVE. Admin Key:") === "MONGLE_OWNER_99") {
-                        document.getElementById('lockdownScreen').style.display = 'none';
-                        document.getElementById('authLayer').style.display = 'flex';
-                    }
-                } else {
-                    if(prompt("System Key:") === "mongle77") {
-                        document.getElementById('lockdownScreen').style.display = 'none';
-                        document.getElementById('authLayer').style.display = 'flex';
-                    }
-                }
+                const pass = prompt(isMaintenance ? "MAINTENANCE ACTIVE. ROOT_KEY:" : "SYSTEM_KEY:");
+                if (isMaintenance && pass === "MONGLE_OWNER_99") { enter(); }
+                else if (!isMaintenance && pass === "mongle77") { enter(); }
             }
         });
+        function enter() { document.getElementById('lockdownScreen').style.display = 'none'; document.getElementById('authLayer').style.display = 'flex'; }
 
         // AUTH
         window.handleLogin = (role) => {
-            const user = document.getElementById('username').value || "GUEST";
-            document.getElementById('userTag').innerText = "USER: " + user.toUpperCase();
             document.getElementById('authLayer').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
             if(role === 'root') document.getElementById('adminBtn').style.display = 'block';
             loadGames();
         };
+        window.promptRoot = () => { if(prompt("ENTER ROOT KEY:") === "MONGLE_OWNER_99") handleLogin('root'); };
 
-        window.promptRoot = () => { if(prompt("ROOT_KEY:") === "MONGLE_OWNER_99") handleLogin('root'); };
+        // MAINTENANCE
+        onValue(ref(db, 'system/maintenance'), (snap) => {
+            isMaintenance = snap.val() || false;
+            document.getElementById('maintBtn').innerText = isMaintenance ? "DEACTIVATE LOCK" : "ACTIVATE LOCK";
+            if (isMaintenance && document.getElementById('adminBtn').style.display !== 'block') location.reload();
+        });
+        window.toggleMaintenance = () => set(ref(db, 'system/maintenance'), !isMaintenance);
 
-        // UPDATES
-        onValue(query(ref(db, 'system/updates'), limitToLast(10)), (snap) => {
+        // GAME REQUESTS
+        window.submitRequest = () => {
+            const req = document.getElementById('gameReqInput').value;
+            if(!req) return;
+            push(ref(db, 'system/requests'), { name: req, date: new Date().toLocaleDateString() });
+            document.getElementById('gameReqInput').value = "";
+            alert("Request sent to Admin.");
+        };
+        onValue(ref(db, 'system/requests'), (snap) => {
+            const list = document.getElementById('requestList');
+            list.innerHTML = "";
+            const data = snap.val();
+            if(data) Object.values(data).forEach(v => {
+                list.innerHTML += `<div style="border-bottom:1px solid #222; padding:3px;">${v.name} (${v.date})</div>`;
+            });
+        });
+        window.clearRequests = () => { if(confirm("Clear all requests?")) remove(ref(db, 'system/requests')); };
+
+        // UPDATES & LOGS
+        onValue(query(ref(db, 'system/updates'), limitToLast(5)), (snap) => {
             const container = document.getElementById('updatesContainer');
             container.innerHTML = "";
             const data = snap.val();
-            if(data) {
-                Object.values(data).reverse().forEach(v => {
-                    const d = document.createElement('div');
-                    d.className = 'update-item';
-                    d.innerHTML = `<span class="update-date">${v.date}</span><div style="color:#aaa;">${v.text}</div>`;
-                    container.appendChild(d);
-                });
-            }
+            if(data) Object.values(data).reverse().forEach(v => {
+                container.innerHTML += `<div style="margin-bottom:8px;"><span style="color:var(--pin)">${v.date}</span>: ${v.text}</div>`;
+            });
         });
-
         window.postUpdate = () => {
             const txt = document.getElementById('updateInp').value;
-            if(txt) {
-                push(ref(db, 'system/updates'), { text: txt, date: new Date().toISOString().split('T')[0] });
-                document.getElementById('updateInp').value = "";
-            }
+            if(txt) push(ref(db, 'system/updates'), { text: txt, date: new Date().toISOString().split('T')[0] });
+            document.getElementById('updateInp').value = "";
         };
+        window.wipeLogs = () => { if(confirm("Wipe all logs?")) remove(ref(db, 'system/updates')); };
 
         // GAMES ENGINE
         async function loadGames() {
-            try {
-                const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
-                const data = await res.json();
-                masterGames = data.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
-                masterGames.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
-                renderGrid(masterGames);
-            } catch(e) { console.log("GH Fail"); }
+            const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
+            const data = await res.json();
+            masterGames = data.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
+            masterGames.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
+            renderGrid(masterGames);
         }
-
-        window.filterGames = () => {
-            const q = document.getElementById('gameSearch').value.toLowerCase();
-            renderGrid(masterGames.filter(g => g.name.toLowerCase().includes(q)));
-        };
-
         function renderGrid(list) {
             const grid = document.getElementById('gameGrid');
             grid.innerHTML = "";
@@ -240,18 +203,14 @@
                 grid.appendChild(card);
             });
         }
-
-        window.toggleModal = (id) => {
-            const el = document.getElementById(id);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        window.filterGames = () => {
+            const q = document.getElementById('gameSearch').value.toLowerCase();
+            renderGrid(masterGames.filter(g => g.name.toLowerCase().includes(q)));
         };
 
-        window.triggerPanic = () => window.location.replace(document.getElementById('panicUrlInput').value);
-
-        // STATUS
-        onValue(ref(db, ".info/connected"), (s) => document.getElementById('dbStatus').classList.toggle('active', s.val()));
-        fetch(`https://api.github.com/repos/bob154526-hue/Mongle`).then(r => document.getElementById('ghStatus').classList.toggle('active', r.ok));
-
+        window.savePlebSettings = () => { localStorage.setItem('monglePanicUrl', document.getElementById('panicUrlInput').value); toggleModal('plebSettings'); };
+        window.toggleModal = (id) => { const el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; };
+        window.triggerPanic = () => window.location.replace(localStorage.getItem('monglePanicUrl') || "https://classroom.google.com");
     </script>
 </body>
 </html>
