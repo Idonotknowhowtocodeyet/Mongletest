@@ -5,108 +5,82 @@
     <title>404 Not Found</title>
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <style>
-        :root { --primary: #00ff41; --bg: #000; --card: #0a0a0a; --accent: #003b00; --panic: #ff3131; --mod: #007bff; --neon: 0 0 10px var(--primary); }
+        :root { --primary: #00ff41; --bg: #000; --panic: #ff3131; --mod: #007bff; --root-red: #ff0000; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Consolas', monospace; overflow: hidden; }
         
-        /* 404 CLOAK */
-        #lockdownScreen { position: fixed; inset: 0; background: #fff; z-index: 1000000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #000; font-family: 'Segoe UI', sans-serif; }
-        
-        /* BROADCAST BANNER */
-        #globalBanner { position: fixed; top: 0; left: 0; width: 100%; background: var(--panic); color: white; padding: 5px; text-align: center; font-size: 12px; z-index: 500000; display: none; font-weight: bold; border-bottom: 2px solid white; }
+        /* THE SECRET ROOT TRIGGER (Top Left Corner) */
+        #ghostTrigger { position: fixed; top: 0; left: 0; width: 5px; height: 5px; background: transparent; z-index: 2147483647; cursor: crosshair; }
 
-        /* INTERNAL GAME VIEWER */
-        #gameViewer { position: fixed; inset: 0; background: #000; z-index: 400000; display: none; flex-direction: column; }
-        #gameIframe { border: none; width: 100%; flex-grow: 1; }
-        .viewer-bar { background: #050505; padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--accent); }
+        /* PRANK OVERLAYS */
+        #flashOverlay { position: fixed; inset: 0; background: #fff; z-index: 999999; display: none; align-items: center; justify-content: center; color: #000; font-size: 50px; font-weight: 900; }
+        #maintOverlay { position: fixed; inset: 0; background: #fff; z-index: 999998; display: none; flex-direction: column; align-items: center; justify-content: center; color: #000; font-family: sans-serif; text-align: center; }
 
-        /* UI LAYOUT */
-        #mainApp { display: none; height: 100vh; flex-direction: column; padding-top: 30px; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--accent); background: #050505; }
-        
+        /* UI ELEMENTS */
+        #mainApp { display: none; height: 100vh; flex-direction: column; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #111; background: #050505; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 25px; overflow-y: auto; flex-grow: 1; }
-        .game-card { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .game-card:hover { border-color: var(--primary); transform: scale(1.02); box-shadow: var(--neon); }
+        .game-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; border-radius: 4px; text-align: center; cursor: pointer; }
+        .game-card:hover { border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
 
         /* MODALS */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #080808; border: 1px solid var(--primary); padding: 20px; z-index: 600000; width: 400px; border-radius: 8px; }
-        .input-box { background: #000; border: 1px solid var(--accent); color: var(--primary); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 8px; border-radius: 4px; text-align: center; font-family: inherit; }
-        .btn-glow { background: var(--primary); color: #000; font-weight: bold; border: none; cursor: pointer; padding: 10px; border-radius: 4px; width: 100%; transition: 0.2s; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #050505; border: 1px solid var(--primary); padding: 20px; z-index: 500000; width: 450px; max-height: 80vh; overflow-y: auto; }
+        .input-box { background: #000; border: 1px solid #222; color: var(--primary); padding: 10px; width: 100%; margin-bottom: 8px; font-family: inherit; box-sizing: border-box; }
+        .btn { padding: 10px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 5px; }
         
-        .log-container { background: #000; border: 1px solid #111; height: 150px; overflow-y: auto; font-size: 11px; margin-bottom: 10px; }
-        .log-entry { padding: 8px; border-bottom: 1px solid #0a0a0a; cursor: pointer; display: flex; justify-content: space-between; }
-        
-        #whisperOverlay { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: #000; border: 2px solid var(--primary); padding: 20px; z-index: 700000; display: none; text-align: center; box-shadow: var(--neon); min-width: 300px; }
+        .log-entry { padding: 10px; border-bottom: 1px solid #111; cursor: pointer; display: flex; justify-content: space-between; font-size: 12px; }
+        .log-entry:hover { background: #0a0a0a; }
+
+        /* STATUS STYLES */
+        .chaos { animation: shake 0.1s infinite; filter: blur(3px) invert(1); pointer-events: none; }
+        @keyframes shake { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } 100% { transform: translate(0, 0); } }
+        .frozen { pointer-events: none !important; filter: grayscale(1); }
     </style>
 </head>
-<body>
+<body id="victimBody">
 
-    <div id="globalBanner">SYSTEM_NOTICE: <span id="bannerText"></span></div>
-
-    <div id="whisperOverlay">
-        <div style="font-size: 10px; color: red; margin-bottom: 10px;">INCOMING_ENCRYPTED_DATA</div>
-        <div id="whisperText" style="font-size: 16px; color: white;"></div>
-        <button class="btn-glow" style="margin-top: 15px; background: #111; color: white;" onclick="this.parentElement.style.display='none'">DISMISS</button>
+    <div id="ghostTrigger" onclick="handleAuthPrompt('ROOT')"></div>
+    <div id="flashOverlay">FLASHBANGED.</div>
+    <div id="maintOverlay">
+        <h1 style="font-size: 60px;">503</h1>
+        <p>Service Temporarily Unavailable</p>
+        <hr style="width: 50%;">
+        <p>The server is down for maintenance. Please try again later.</p>
     </div>
 
-    <div id="gameViewer">
-        <div class="viewer-bar">
-            <span id="currentGameTitle" style="color:white; font-weight:bold;">LOADING...</span>
-            <button class="btn-glow" style="width:auto; padding:0 20px; background:red; color:white;" onclick="closeGame()">EXIT_GAME</button>
-        </div>
-        <iframe id="gameIframe" src=""></iframe>
-    </div>
-
-    <div id="lockdownScreen">
-        <h1 style="font-size: 80px; margin: 0;">404</h1>
-        <p>The requested URL was not found on this server.</p>
+    <div id="lockdown" style="position:fixed; inset:0; background:#fff; z-index:100000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#000;">
+        <h1 style="font-size: 80px; margin:0;">404</h1>
+        <p>Not Found</p>
     </div>
 
     <div id="mainApp">
         <div class="top-bar">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <div style="font-weight:900; letter-spacing:3px; font-size: 18px; color:white;">MONGLE_<span style="color:var(--primary)">OS</span></div>
-                <input type="text" id="searchBar" class="input-box" style="width: 200px; margin: 0; padding: 5px;" placeholder="SEARCH GAMES/USERS..." onkeyup="masterSearch()">
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button class="input-box" style="width:auto; margin:0; padding: 5px 15px;" onclick="toggleModal('settingsModal')">SETTINGS</button>
-                <button id="staffBtn" class="input-box" style="display:none; width:auto; margin:0; border-color:var(--mod); color:var(--mod);" onclick="toggleModal('staffConsole')">ROOT</button>
-                <button class="input-box" style="background:var(--panic); color:white; border:none; width:auto;" onclick="triggerPanic()">PANIC</button>
+            <div style="font-weight:900; letter-spacing:2px; color:white;">MONGLE_OS <span id="roleLabel" style="font-size:10px; color:var(--primary);"></span></div>
+            <div style="display:flex; gap:10px;">
+                <button id="adminBtn" class="btn" style="display:none; background:var(--mod); width:auto; margin:0;" onclick="toggleModal('panel')">ADMIN</button>
+                <button id="rootBtn" class="btn" style="display:none; background:var(--root-red); width:auto; margin:0;" onclick="toggleModal('panel')">OVERLORD</button>
             </div>
         </div>
         <div class="grid" id="gameGrid"></div>
     </div>
 
-    <div id="staffConsole" class="modal">
-        <h3 style="color:var(--mod); margin-top:0;">OVERLORD_PANEL</h3>
-        <div id="userLogs" class="log-container"></div>
+    <div id="panel" class="modal">
+        <h2 id="panelTitle" style="margin-top:0;">TERMINAL</h2>
+        <div id="userLogs" style="background:#000; border:1px solid #111; height:200px; overflow-y:auto; margin-bottom:10px;"></div>
         
-        <p style="font-size:9px; color:#555;">GLOBAL BROADCAST PIN</p>
-        <input type="text" id="broadcastInp" class="input-box" placeholder="Message for all users...">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;">
-            <button class="btn-glow" onclick="sendBroadcast()">PIN MESSAGE</button>
-            <button class="btn-glow" style="background:#222; color:white;" onclick="clearBroadcast()">CLEAR PIN</button>
+        <div id="targetControls" style="display:none; border-top:1px solid #222; padding-top:10px;">
+            <p style="font-size:10px; color:#555;">TARGET: <span id="targetName" style="color:white;">--</span></p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <button class="btn" style="background:var(--mod);" onclick="sendWhisper()">WHISPER</button>
+                <button class="btn" style="background:var(--panic);" onclick="targetAction('kick')">KICK</button>
+            </div>
+            <div id="prankControls" style="display:none; grid-template-columns: 1fr 1fr; gap:5px;">
+                <button class="btn" style="background:orange;" onclick="targetAction('chaos')">CHAOS</button>
+                <button class="btn" style="background:#fff; color:#000;" onclick="targetAction('flash')">FLASHBANG</button>
+                <button class="btn" style="background:#555;" onclick="targetAction('maint')">MAINTENANCE</button>
+                <button class="btn" style="background:cyan; color:#000;" onclick="targetAction('freeze')">FREEZE</button>
+            </div>
         </div>
-
-        <div id="rootActions" style="display:none;">
-            <button class="btn-glow" style="background:#ff8c00;" onclick="remove(ref(db, 'system/logs'))">PURGE ALL SESSIONS</button>
-        </div>
-        <button class="input-box" onclick="toggleModal('staffConsole')" style="margin-top:10px;">EXIT</button>
-    </div>
-
-    <div id="settingsModal" class="modal">
-        <h3>SYSTEM_SETTINGS</h3>
-        <input type="text" id="panicUrlInput" class="input-box" placeholder="Panic URL (https://...)">
-        <button class="btn-glow" onclick="saveSettings()">SAVE CONFIG</button>
-        <button class="input-box" onclick="toggleModal('settingsModal')" style="margin-top:5px; border:none;">CLOSE</button>
-    </div>
-
-    <div id="authLayer" style="display:none; position:fixed; inset:0; background:#000; z-index:900000; align-items:center; justify-content:center; flex-direction:column;">
-        <h1 style="letter-spacing:10px;">MONGLE_OS</h1>
-        <div style="width:280px; text-align:center; background:#050505; padding:30px; border:1px solid #111;">
-            <input type="text" id="username" class="input-box" placeholder="USERNAME" maxlength="15">
-            <button class="btn-glow" onclick="handleLogin('GUEST')">ENTER</button>
-            <button class="input-box" style="margin-top:15px; font-size:10px;" onclick="handleAuthPrompt()">ROOT_ACCESS</button>
-        </div>
+        <button class="input-box" onclick="toggleModal('panel')" style="margin-top:10px; cursor:pointer;">CLOSE</button>
     </div>
 
     <script type="module">
@@ -117,125 +91,92 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let userRole = "GUEST", isGhost = false, currentUserName = "", userRef = null, panicUrl = localStorage.getItem("panicUrl") || "https://google.com";
+        let userRole = "GUEST", currentUserName = "", userRef = null, selectedUser = null;
 
-        window.handleAuthPrompt = () => {
-            const id = prompt("KEY:");
-            if(id === "MONGLE_OWNER_99") { userRole = "ROOT"; isGhost = true; setupSession(); }
-            else if(id === "MONGLE_MOD_2026") { userRole = "ADMIN"; isGhost = false; setupSession(); }
+        // AUTH
+        window.handleAuthPrompt = (target) => {
+            const key = prompt(`${target} ACCESS KEY:`);
+            if(key === "MONGLE_OWNER_99") { userRole = "ROOT"; initSession(); }
+            else if(key === "MONGLE_MOD_2026") { userRole = "ADMIN"; initSession(); }
         };
 
-        window.handleLogin = (role) => {
-            if(!document.getElementById('username').value) return alert("Identify yourself.");
-            userRole = role; setupSession();
-        };
-
-        function setupSession() {
-            currentUserName = document.getElementById('username').value;
-            document.getElementById('authLayer').style.display = 'none';
+        function initSession() {
+            if(!currentUserName) currentUserName = prompt("NAME:") || "Guest";
+            document.getElementById('lockdown').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('roleLabel').innerText = `[${userRole}]`;
             
-            if(!isGhost) {
-                userRef = push(ref(db, 'system/logs'), { user: currentUserName, role: userRole, status: "Idle", time: Date.now() });
-                onDisconnect(userRef).remove();
-            }
+            if(userRole === "ROOT") document.getElementById('rootBtn').style.display = 'block';
+            if(userRole === "ADMIN") document.getElementById('adminBtn').style.display = 'block';
 
-            if(userRole === "ROOT" || userRole === "ADMIN") {
-                document.getElementById('staffBtn').style.display = 'block';
-                if(userRole === "ROOT") document.getElementById('rootActions').style.display = 'block';
-            }
+            // Presence
+            userRef = push(ref(db, 'system/logs'), { user: currentUserName, role: userRole, status: "Online" });
+            onDisconnect(userRef).remove();
+
+            startSync();
             loadGames();
-            syncSystem();
         }
 
-        function syncSystem() {
-            // Listen for Global Pin
-            onValue(ref(db, 'system/broadcast'), (s) => {
-                const d = s.val();
-                if(d && d.active) {
-                    document.getElementById('bannerText').innerText = d.msg;
-                    document.getElementById('globalBanner').style.display = 'block';
-                } else {
-                    document.getElementById('globalBanner').style.display = 'none';
-                }
-            });
-
-            // Listen for Whispers
-            onValue(ref(db, `system/whispers/${currentUserName}`), (s) => {
-                const d = s.val();
-                if(d) {
-                    document.getElementById('whisperText').innerText = d.msg;
-                    document.getElementById('whisperOverlay').style.display = 'block';
-                    remove(ref(db, `system/whispers/${currentUserName}`));
-                }
-            });
-
-            // Listen for Admin Logs
+        function startSync() {
             onValue(ref(db, 'system/logs'), (s) => {
-                const data = s.val() || {};
-                const logBox = document.getElementById('userLogs'); logBox.innerHTML = "";
-                Object.entries(data).forEach(([key, l]) => {
+                const logs = document.getElementById('userLogs'); logs.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([key, val]) => {
                     const div = document.createElement('div');
                     div.className = "log-entry";
-                    div.innerHTML = `<span>[${l.role}] ${l.user}</span> <span style="font-size:9px; color:#555;">${l.status}</span>`;
+                    div.innerHTML = `<span>${val.user}</span> <span style="color:#555;">${val.role}</span>`;
                     div.onclick = () => {
-                        const msg = prompt(`Whisper to ${l.user}:`);
-                        if(msg) set(ref(db, `system/whispers/${l.user}`), { msg });
+                        selectedUser = val.user;
+                        document.getElementById('targetName').innerText = selectedUser;
+                        document.getElementById('targetControls').style.display = 'block';
+                        if(userRole === "ROOT") document.getElementById('prankControls').style.display = 'grid';
                     };
-                    logBox.appendChild(div);
+                    logs.appendChild(div);
                 });
+            });
+
+            // Victim Listener
+            onValue(ref(db, `system/victims/${currentUserName}`), (s) => {
+                const v = s.val() || {};
+                const body = document.getElementById('victimBody');
+                if(v.kick) window.location.replace("https://google.com");
+                if(v.flash) { document.getElementById('flashOverlay').style.display = 'flex'; setTimeout(() => document.getElementById('flashOverlay').style.display = 'none', 3000); }
+                if(v.maint) document.getElementById('maintOverlay').style.display = 'flex';
+                if(v.freeze) body.classList.toggle('frozen', v.freeze);
+                if(v.chaos) body.classList.toggle('chaos', v.chaos);
+                if(v.whisper) alert("ENCRYPTED MSG: " + v.whisper);
+                set(ref(db, `system/victims/${currentUserName}`), null); // Clear after triggering
             });
         }
 
-        window.openGame = (name, file) => {
-            const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${file}`;
-            document.getElementById('currentGameTitle').innerText = name.toUpperCase();
-            document.getElementById('gameIframe').src = url;
-            document.getElementById('gameViewer').style.display = 'flex';
-            if(userRef) set(ref(db, `system/logs/${userRef.key}/status`), "Playing: " + name);
+        window.targetAction = (type) => {
+            if(!selectedUser) return;
+            const data = {}; data[type] = true;
+            set(ref(db, `system/victims/${selectedUser}`), data);
         };
 
-        window.closeGame = () => {
-            document.getElementById('gameViewer').style.display = 'none';
-            document.getElementById('gameIframe').src = "";
-            if(userRef) set(ref(db, `system/logs/${userRef.key}/status`), "Idle");
+        window.sendWhisper = () => {
+            const msg = prompt("Message:");
+            if(msg) set(ref(db, `system/victims/${selectedUser}/whisper`), msg);
         };
-
-        window.masterSearch = () => {
-            const q = document.getElementById('searchBar').value.toLowerCase();
-            // Filter Games
-            document.querySelectorAll('.game-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(q) ? 'block' : 'none');
-            // Filter Users in Log
-            document.querySelectorAll('.log-entry').forEach(e => e.style.display = e.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
-        };
-
-        window.sendBroadcast = () => {
-            const msg = document.getElementById('broadcastInp').value;
-            if(msg) set(ref(db, 'system/broadcast'), { active: true, msg });
-        };
-        window.clearBroadcast = () => set(ref(db, 'system/broadcast'), { active: false });
 
         async function loadGames() {
             const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
             const data = await res.json();
-            const grid = document.getElementById('gameGrid'); grid.innerHTML = "";
+            const grid = document.getElementById('gameGrid');
             data.filter(f => f.name.endsWith('.html') && f.name !== 'index.html').forEach(f => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                const cleanName = f.name.replace('.html','').replace(/[-_]/g, ' ');
-                card.innerText = cleanName;
-                card.onclick = () => openGame(cleanName, f.name);
+                card.innerText = f.name.replace('.html','').replace(/[-_]/g, ' ');
+                card.onclick = () => window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${f.name}`, '_blank');
                 grid.appendChild(card);
             });
         }
 
-        window.saveSettings = () => { localStorage.setItem("panicUrl", document.getElementById('panicUrlInput').value); toggleModal('settingsModal'); };
-        window.triggerPanic = () => window.location.replace(localStorage.getItem("panicUrl") || "https://google.com");
         window.toggleModal = (id) => { const e = document.getElementById(id); e.style.display = (e.style.display === 'block') ? 'none' : 'block'; };
-
-        document.addEventListener('keydown', (e) => { 
-            if(e.shiftKey && e.key === 'L') { document.getElementById('lockdownScreen').style.display = 'none'; document.getElementById('authLayer').style.display = 'flex'; }
-            if(e.key === ']') triggerPanic();
+        
+        // GUEST LOGIN
+        document.addEventListener('keydown', (e) => {
+            if(e.shiftKey && e.key === 'L' && userRole === "GUEST") initSession();
         });
     </script>
 </body>
