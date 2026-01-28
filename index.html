@@ -8,11 +8,11 @@
         :root { --primary: #00ff41; --bg: #000; --card: #0a0a0a; --accent: #003b00; --panic: #ff3131; --pin: #ffcc00; --neon: 0 0 10px var(--primary); }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--primary); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        /* CINEMATIC OVERLAY */
+        /* OVERLAYS */
         #cinematicAlert { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 20000; display: none; align-items: center; justify-content: center; text-align: center; }
         #bigText { font-size: 8vw; font-weight: 900; color: white; text-transform: uppercase; text-shadow: 0 0 30px red; }
 
-        /* APP UI */
+        /* UI */
         #lockdownScreen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #000; }
         #mainApp { display: none; height: 100vh; flex-direction: column; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--accent); background: #050505; }
@@ -20,15 +20,16 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 25px; overflow-y: auto; flex-grow: 1; }
         .game-card { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; }
         .game-card:hover { border-color: var(--primary); transform: scale(1.05); box-shadow: var(--neon); }
-        .stat-badge { position: absolute; top: 5px; right: 8px; font-size: 12px; }
 
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0a0a0a; border: 2px solid var(--primary); padding: 25px; z-index: 11000; width: 400px; border-radius: 12px; box-shadow: 0 0 100px #000; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0a0a0a; border: 2px solid var(--primary); padding: 25px; z-index: 11000; width: 420px; border-radius: 12px; box-shadow: 0 0 100px #000; }
         .input-box { background: #000; border: 1px solid var(--accent); color: var(--primary); padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; border-radius: 5px; }
         .btn-glow { background: var(--primary); color: #000; font-weight: bold; border: none; cursor: pointer; }
         
-        /* SERVER LOGS */
-        .log-container { background: #050505; border: 1px solid #222; height: 80px; overflow-y: auto; font-family: monospace; font-size: 10px; padding: 5px; margin-bottom: 10px; }
-        .log-entry { border-bottom: 1px solid #111; padding: 2px; display: flex; justify-content: space-between; }
+        /* LOGS & KICK */
+        .log-container { background: #050505; border: 1px solid #222; height: 120px; overflow-y: auto; font-family: monospace; font-size: 10px; padding: 5px; margin-bottom: 10px; }
+        .log-entry { border-bottom: 1px solid #111; padding: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .kick-btn { background: #400; color: white; border: 1px solid red; font-size: 9px; padding: 2px 5px; cursor: pointer; border-radius: 3px; }
+        .kick-btn:hover { background: red; }
     </style>
 </head>
 <body>
@@ -37,7 +38,7 @@
 
     <div id="lockdownScreen">
         <h1 style="font-size:100px; margin:0; color:#eee;">404</h1>
-        <p>File not found.</p>
+        <p>Resource not found.</p>
     </div>
 
     <div id="mainApp">
@@ -54,13 +55,13 @@
     </div>
 
     <div id="adminSettings" class="modal">
-        <h2 style="color:red; margin:0 0 15px 0; text-align:center;">ROOT_COMMAND</h2>
+        <h2 style="color:red; margin:0 0 10px 0; text-align:center;">ROOT_COMMAND</h2>
         
-        <p style="font-size:10px; color:var(--primary);">LIVE_TRAFFIC_LOG:</p>
+        <p style="font-size:10px; color:var(--primary); margin:0;">LIVE_TRAFFIC_LOG & BAN_LIST:</p>
         <div id="userLogs" class="log-container"></div>
-        <button class="input-box" onclick="clearLogs()" style="font-size:9px; height:25px; margin-bottom:15px;">WIPE LOGS</button>
+        <button class="input-box" onclick="clearLogs()" style="font-size:9px; height:25px; margin-bottom:15px;">WIPE ALL LOGS</button>
 
-        <input type="text" id="bigMsgInp" class="input-box" placeholder="Cinematic Message...">
+        <input type="text" id="bigMsgInp" class="input-box" placeholder="Big Text Broadcast...">
         <div style="display:flex; gap:5px; margin-bottom:15px;">
             <button class="input-box btn-glow" onclick="setBigText(true)">BROADCAST</button>
             <button class="input-box" onclick="setBigText(false)">CLEAR</button>
@@ -76,9 +77,8 @@
 
     <div id="plebSettings" class="modal">
         <h3>SYSTEM PREFS</h3>
-        <p style="font-size:11px;">PANIC REDIRECT URL:</p>
         <input type="text" id="panicUrlInput" class="input-box" placeholder="https://google.com">
-        <button class="input-box btn-glow" onclick="saveSettings()">SAVE PROTOCOL</button>
+        <button class="input-box btn-glow" onclick="saveSettings()">SAVE PANIC KEY</button>
         <button class="input-box" onclick="toggleModal('plebSettings')">CLOSE</button>
     </div>
 
@@ -100,33 +100,40 @@
         const db = getDatabase(app);
 
         let masterGames = [];
-        let gameStats = {};
-        const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let myId = Math.random().toString(36).substring(7);
+        let currentUserName = "";
 
-        // TRAFFIC MONITORING
+        // MONITORING & KICKING
         onValue(ref(db, 'system/logs'), (s) => {
             const logBox = document.getElementById('userLogs');
             logBox.innerHTML = "";
             const data = s.val();
-            if(data) Object.values(data).reverse().forEach(l => {
-                logBox.innerHTML += `<div class="log-entry"><span>${l.user}</span> <span style="color:#444">${l.time}</span></div>`;
+            if(data) Object.entries(data).reverse().forEach(([key, l]) => {
+                logBox.innerHTML += `
+                    <div class="log-entry">
+                        <span>${l.user} <small style="color:#444">${l.time}</small></span>
+                        <button class="kick-btn" onclick="kickUser('${l.user}')">KICK</button>
+                    </div>`;
             });
         });
+
+        window.kickUser = (targetUser) => {
+            if(confirm(`Kick ${targetUser}?`)) {
+                set(ref(db, `system/kickList/${targetUser}`), true);
+                setTimeout(() => remove(ref(db, `system/kickList/${targetUser}`)), 5000); // Reset after 5s
+            }
+        };
+
+        onValue(ref(db, `system/kickList`), (s) => {
+            const bans = s.val();
+            if(bans && bans[currentUserName] && !window.isRoot) {
+                document.body.innerHTML = `<div style="background:blue; color:white; padding:50px; height:100vh; font-family:monospace;">:( YOUR SESSION HAS BEEN TERMINATED BY ADMIN.</div>`;
+            }
+        });
+
         window.clearLogs = () => remove(ref(db, 'system/logs'));
 
-        // SETTINGS & PANIC
-        window.openSettings = () => {
-            document.getElementById('panicUrlInput').value = localStorage.getItem('monglePanicUrl') || "https://classroom.google.com";
-            toggleModal('plebSettings');
-        };
-        window.saveSettings = () => {
-            localStorage.setItem('monglePanicUrl', document.getElementById('panicUrlInput').value);
-            alert("Settings Synchronized.");
-            toggleModal('plebSettings');
-        };
-        window.triggerPanic = () => window.location.replace(localStorage.getItem('monglePanicUrl') || "https://classroom.google.com");
-
-        // GLOBAL SYNC (BIG TEXT & PRANKS)
+        // GLOBAL SYNC
         onValue(ref(db, 'system/bigText'), (s) => {
             const d = s.val() || { active: false, text: "" };
             const el = document.getElementById('cinematicAlert');
@@ -144,30 +151,30 @@
         window.setBigText = (active) => set(ref(db, 'system/bigText'), { active, text: document.getElementById('bigMsgInp').value });
         window.triggerRemote = (type) => { set(ref(db, 'system/remoteTrigger'), type); setTimeout(() => set(ref(db, 'system/remoteTrigger'), null), 1000); };
 
-        // GAMES ENGINE
+        // CORE ENGINE
         async function loadGames() {
             const res = await fetch(`https://api.github.com/repos/bob154526-hue/Mongle/contents/`);
             const data = await res.json();
             masterGames = data.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
-            onValue(ref(db, 'system/stats'), (s) => { gameStats = s.val() || {}; renderGrid(masterGames); });
+            renderGrid(masterGames);
         }
 
         function renderGrid(list) {
             const grid = document.getElementById('gameGrid'); grid.innerHTML = "";
             list.forEach(f => {
-                const clicks = gameStats[norm(f.name)] || 0;
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                card.innerHTML = `${f.name.replace('.html','').replace(/[-_]/g, ' ')} ${clicks > 15 ? '<span class="stat-badge">🔥</span>' : ''}`;
-                card.onclick = () => {
-                    runTransaction(ref(db, `system/stats/${norm(f.name)}`), (c) => (c || 0) + 1);
-                    window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${f.name}`, '_blank');
-                };
+                card.innerHTML = f.name.replace('.html','').replace(/[-_]/g, ' ');
+                card.onclick = () => window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${f.name}`, '_blank');
                 grid.appendChild(card);
             });
         }
 
-        // AUTH
+        // AUTH & SETTINGS
+        window.openSettings = () => { document.getElementById('panicUrlInput').value = localStorage.getItem('monglePanicUrl') || "https://classroom.google.com"; toggleModal('plebSettings'); };
+        window.saveSettings = () => { localStorage.setItem('monglePanicUrl', document.getElementById('panicUrlInput').value); alert("Panic Key Saved."); toggleModal('plebSettings'); };
+        window.triggerPanic = () => window.location.replace(localStorage.getItem('monglePanicUrl') || "https://classroom.google.com");
+
         document.addEventListener('keydown', (e) => { if(e.shiftKey && e.key === 'L') enter(); });
         function enter() { 
             const p = prompt("ACCESS_ID:");
@@ -178,8 +185,8 @@
             }
         }
         window.handleLogin = () => {
-            const user = document.getElementById('username').value || "Anonymous";
-            push(ref(db, 'system/logs'), { user, time: new Date().toLocaleTimeString() });
+            currentUserName = document.getElementById('username').value || "Guest_" + myId;
+            push(ref(db, 'system/logs'), { user: currentUserName, time: new Date().toLocaleTimeString() });
             document.getElementById('authLayer').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
             if(window.isRoot) document.getElementById('adminBtn').style.display = 'block';
