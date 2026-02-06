@@ -54,6 +54,11 @@
 
         .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 10px; }
         .check-box { width: 20px; height: 20px; border: 1px solid #444; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+
+        /* Updates modal specifics */
+        #updatesList { max-height: 50vh; overflow-y: auto; background:#050505; border:1px solid #333; padding:12px; border-radius:8px; color:#ddd; font-size:13px; }
+        .update-item { padding:8px 10px; border-bottom:1px solid #171717; }
+        .update-time { color:#888; font-size:11px; display:block; margin-top:6px; }
     </style>
 </head>
 <body>
@@ -134,6 +139,13 @@
                     <button class="btn" onclick="adminCustom('redir')">REDIR</button>
                     <button class="btn" onclick="adminCustom('openTab')">TAB</button>
                 </div>
+
+                <!-- Admin announcement controls -->
+                <div style="margin-top:12px; display:flex; gap:8px;">
+                    <input id="adminUpdateInp" class="input" placeholder="Write announcement..." style="margin:0;">
+                    <button class="btn btn-warn" onclick="adminAddUpdate()">ADD UPDATE</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -154,7 +166,36 @@
             <option value="blank">About:Blank (Full Stealth)</option>
             <option value="embed">Embed in Mongle Tab</option>
         </select>
+
+        <label style="font-size:12px; color:#888; margin-top:8px;">APPEARANCE</label>
+        <select id="cfgTheme" class="input">
+            <option value="mongle">MONGLE (Default)</option>
+            <option value="clever">CLEVER (Light / Blue)</option>
+            <option value="canva">CANVA (Purple / Gradient)</option>
+            <option value="website">WEBSITE (Neutral / Gray)</option>
+        </select>
+
         <button class="btn" style="width:100%" onclick="saveConfig()">SAVE SETTINGS</button>
+    </div>
+
+    <!-- Updates modal -->
+    <div id="updatesM" class="modal" style="max-width:800px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0; color:var(--primary);">MONGLE UPDATES</h3>
+            <div>
+                <button class="btn" style="background:#222; color:#fff;" onclick="toggleModal('updatesM')">CLOSE</button>
+            </div>
+        </div>
+
+        <div id="updatesList">Loading updates...</div>
+
+        <div id="adminUpdateControls" style="margin-top:12px; display:none;">
+            <input id="updateText" class="input" placeholder="Write an update (admins only)..." />
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="btn" onclick="adminAddUpdateFromUpdates()">POST UPDATE</button>
+                <button class="btn" onclick="fetchUpdates()">REFRESH</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -168,7 +209,7 @@
 
         let userRef, myID, selectedID, isAdmin = false, gameData = [];
         let favs = JSON.parse(localStorage.getItem('favs') || '[]');
-        let cfg = { url: localStorage.getItem('pUrl') || 'https://google.com', key: localStorage.getItem('pKey') || 'Escape', mode: localStorage.getItem('pMode') || 'tab', enable: localStorage.getItem('pEnable') !== 'false' };
+        let cfg = { url: localStorage.getItem('pUrl') || 'https://google.com', key: localStorage.getItem('pKey') || 'Escape', mode: localStorage.getItem('pMode') || 'tab', enable: localStorage.getItem('pEnable') !== 'false', theme: localStorage.getItem('pTheme') || 'mongle' };
         let activeGameWindow = null, watchInterval = null, tempKey = cfg.key;
         let presenceSnapshot = {};
         
@@ -178,6 +219,48 @@
             const handler = (e) => { e.preventDefault(); tempKey = e.key; keyDisp.value = e.key.toUpperCase(); keyDisp.style.background = "#000"; window.removeEventListener('keydown', handler); };
             window.addEventListener('keydown', handler);
         };
+
+        // Apply theme by tweaking css variables
+        function applyTheme(t) {
+            const root = document.documentElement.style;
+            if (t === 'clever') {
+                root.setProperty('--primary', '#0b63d1');
+                root.setProperty('--bg', '#f6f9fc');
+                root.setProperty('--card', '#ffffff');
+                root.setProperty('--accent', '#084a9e');
+                root.setProperty('--fav', '#ff4757');
+                root.setProperty('--warn', '#ffae00');
+                root.setProperty('--err', '#d63031');
+                document.body.style.background = root.getPropertyValue('--bg');
+            } else if (t === 'canva') {
+                root.setProperty('--primary', '#7c5cff');
+                root.setProperty('--bg', 'linear-gradient(135deg,#0f172a,#7c5cff 60%)');
+                root.setProperty('--card', 'rgba(255,255,255,0.04)');
+                root.setProperty('--accent', '#5a3bff');
+                root.setProperty('--fav', '#ffb86b');
+                root.setProperty('--warn', '#ffc857');
+                root.setProperty('--err', '#ff6b6b');
+                document.body.style.background = root.getPropertyValue('--bg');
+            } else if (t === 'website') {
+                root.setProperty('--primary', '#2d3748');
+                root.setProperty('--bg', '#f4f6f8');
+                root.setProperty('--card', '#ffffff');
+                root.setProperty('--accent', '#1f2937');
+                root.setProperty('--fav', '#ff6b6b');
+                root.setProperty('--warn', '#ffae00');
+                root.setProperty('--err', '#d90429');
+                document.body.style.background = root.getPropertyValue('--bg');
+            } else { // mongle (default)
+                root.setProperty('--primary', '#00ff41');
+                root.setProperty('--bg', '#000');
+                root.setProperty('--card', '#111');
+                root.setProperty('--accent', '#003b00');
+                root.setProperty('--fav', '#ff4757');
+                root.setProperty('--warn', '#ffae00');
+                root.setProperty('--err', '#ff0000');
+                document.body.style.background = root.getPropertyValue('--bg');
+            }
+        }
 
         // Opens a new about:blank and embeds the Mongle app (this page) inside an iframe there.
         window.openMongleAboutBlank = () => {
@@ -206,6 +289,9 @@
             document.getElementById('lockdown').style.display="none"; 
             document.getElementById('loginOverlay').style.display="none"; 
             document.getElementById('app').style.display="flex";
+
+            // Apply saved theme right away
+            applyTheme(cfg.theme);
 
             let ipInfo = { ip: 'Hidden', city: '?', region: '?', org: '?' };
             try { const r = await fetch('https://ipapi.co/json/'); if(r.ok) ipInfo = await r.json(); } catch(e) {}
@@ -259,6 +345,13 @@
             } catch(e) { console.error("Source fetch failed.", e); }
             
             if(isAdmin) startOverseer();
+
+            // set admin update controls visibility
+            document.getElementById('adminUpdateControls').style.display = isAdmin ? 'block' : 'none';
+
+            // start listening for updates feed
+            fetchUpdates();
+            onValue(ref(db, 'updates'), (s) => { renderUpdatesFromSnapshot(s); }, (err) => { console.error("updates read failed", err); });
         };
 
         function closeGame() { if(activeGameWindow) activeGameWindow.close(); }
@@ -442,12 +535,15 @@
         
         window.addEventListener('keydown', (e) => {
             if (cfg.enable && (e.key === cfg.key || e.code === cfg.key)) panicTrigger();
-            if (e.shiftKey && (e.key === 'L' || e.key === 'l')) { e.preventDefault(); document.getElementById('loginOverlay').style.display = 'flex'; }
+            // Show updates on Shift+L (user request). Prevent default and open updates modal.
+            if (e.shiftKey && (e.key === 'L' || e.key === 'l')) { e.preventDefault(); toggleModal('updatesM'); return; }
         }, true);
 
         window.saveConfig = () => {
             cfg.url = document.getElementById('cfgUrl').value; cfg.key = tempKey; cfg.mode = document.getElementById('cfgMode').value;
-            localStorage.setItem('pUrl', cfg.url); localStorage.setItem('pKey', cfg.key); localStorage.setItem('pMode', cfg.mode); localStorage.setItem('pEnable', cfg.enable);
+            cfg.theme = document.getElementById('cfgTheme').value || cfg.theme;
+            localStorage.setItem('pUrl', cfg.url); localStorage.setItem('pKey', cfg.key); localStorage.setItem('pMode', cfg.mode); localStorage.setItem('pEnable', cfg.enable); localStorage.setItem('pTheme', cfg.theme);
+            applyTheme(cfg.theme);
             alert("SAVED"); toggleModal('settingsM');
         };
 
@@ -459,6 +555,61 @@
 
         document.getElementById('cfgUrl').value = cfg.url; document.getElementById('cfgKeyDisp').value = cfg.key.toUpperCase();
         document.getElementById('cfgMode').value = cfg.mode; document.getElementById('chkEnable').innerText = cfg.enable ? '✓' : '';
+        document.getElementById('cfgTheme').value = cfg.theme;
+        applyTheme(cfg.theme);
+
+        /* --- Updates feed functions --- */
+        async function fetchUpdates() {
+            // initial fetch handled by onValue in initSession; this is a manual refresh helper
+            const node = ref(db, 'updates');
+            onValue(node, (s) => {
+                renderUpdatesFromSnapshot(s);
+            }, { onlyOnce: true });
+        }
+
+        function renderUpdatesFromSnapshot(snap) {
+            const listEl = document.getElementById('updatesList');
+            if (!snap || !snap.exists()) { listEl.innerHTML = '<div class="update-item">No updates yet.</div>'; return; }
+            const items = [];
+            snap.forEach(c => {
+                const v = c.val() || {};
+                items.push({ id: c.key, text: v.text, author: v.author, created: v.created });
+            });
+            // sort newest first
+            items.sort((a,b) => (b.created||'').localeCompare(a.created||''));
+            listEl.innerHTML = items.map(it => {
+                const t = it.created ? new Date(it.created).toLocaleString() : 'Unknown time';
+                const auth = it.author || 'SYSTEM';
+                const safeText = escapeHtml(it.text || '');
+                return `<div class="update-item"><div>${safeText}</div><span class="update-time">${escapeHtml(auth)} • ${escapeHtml(t)}</span></div>`;
+            }).join('');
+        }
+
+        // Admin: push an update from admin modal controls
+        window.adminAddUpdate = () => {
+            const text = document.getElementById('adminUpdateInp').value || '';
+            if (!text.trim()) return alert('Write something first.');
+            const payload = { text: text.trim(), author: (isAdmin ? 'OVERSEER' : 'ADMIN'), created: new Date().toISOString() };
+            push(ref(db, 'updates'), payload).then(() => {
+                document.getElementById('adminUpdateInp').value = '';
+                alert('Update posted.');
+            }).catch(e => { alert('Failed to post: '+e); console.error(e); });
+        };
+
+        // Admin: push update from updates modal controls
+        window.adminAddUpdateFromUpdates = () => {
+            const text = document.getElementById('updateText').value || '';
+            if (!text.trim()) return alert('Write something first.');
+            const payload = { text: text.trim(), author: (isAdmin ? 'OVERSEER' : 'ADMIN'), created: new Date().toISOString() };
+            push(ref(db, 'updates'), payload).then(() => {
+                document.getElementById('updateText').value = '';
+                alert('Update posted.');
+            }).catch(e => { alert('Failed to post: '+e); console.error(e); });
+        };
+
+        // small HTML-escape helper included above
+
+        // small embedded container (kept) - unchanged
     </script>
 
     <!-- Embedded container (client-side) kept for embedding feature -->
